@@ -19,7 +19,6 @@ import kotlin.collections.indexOfFirst
 class LocationRepository(private val context: Context) {
     private val file = File(context.filesDir, "locations.json")
     private val imageDir = File(context.filesDir, "images")
-
     private val mutex = Mutex()
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
 

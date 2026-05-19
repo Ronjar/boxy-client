@@ -50,7 +50,7 @@ fun OverviewScreen(
 
     val locations by viewModel.currentLocations.collectAsStateWithLifecycle()
     val currentParent by viewModel.currentParent.collectAsStateWithLifecycle()
-    val assets = viewModel.currentAssets
+    val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
 
     var assetDialogState by remember {
         mutableStateOf<EditOptionsDialogState<Asset>>(
@@ -150,11 +150,11 @@ fun OverviewScreen(
                     .padding(paddingValues),
                 columns = GridCells.Fixed(3)
             ) {
-                when (assets) {
+                when (val state = assets) {
                     is DataFetcher.Fetching -> item { Text("Loading...") }
                     is DataFetcher.Error -> item { Text("Error") }
                     is DataFetcher.Data -> {
-                        items(assets.data) { asset ->
+                        items(state.data) { asset ->
                             AssetCard(
                                 modifier = Modifier.padding(8.dp),
                                 asset = asset,

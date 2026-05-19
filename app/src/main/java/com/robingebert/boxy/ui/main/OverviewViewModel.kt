@@ -1,6 +1,5 @@
 package com.robingebert.boxy.ui.main
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robingebert.boxy.data.network.DataFetcher
@@ -9,10 +8,12 @@ import com.robingebert.boxy.domain.LocationRepository
 import com.robingebert.boxy.domain.models.Asset
 import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.domain.models.LocationNode
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -32,6 +33,7 @@ class OverviewViewModel(
 
     val hasParentLocation: Boolean get() = _currentParent.value != null
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val currentLocations: StateFlow<DataFetcher<List<LocationNode>>> = _currentParent
         .flatMapLatest { parent ->
             locationRepository.tree(parent?.id)
@@ -44,28 +46,30 @@ class OverviewViewModel(
             initialValue = DataFetcher.Fetching
         )
 
-    /*
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     val currentAssets: StateFlow<DataFetcher<List<Asset>>> = _currentParent
         .flatMapLatest { parent ->
             if (parent == null) {
                 flowOf(DataFetcher.Data(emptyList()))
             } else {
-                flow {
-                    emit(DataFetcher.Fetching)
-                    try {
-                        val assets = assetRepository.getAssetsForLocationId(parent.id)
-                        emit(DataFetcher.Data(assets))
-                    } catch (e: Exception) {
+                assetRepository.getAssetsForLocationId(parent.id)
+                    .map { assets ->
+                        DataFetcher.Data(assets) as DataFetcher<List<Asset>>
+                    }
+                    .onStart {
+                        emit(DataFetcher.Fetching)
+                    }
+                    .catch {
                         emit(DataFetcher.Data(emptyList()))
                     }
-                }
             }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = DataFetcher.Fetching
-        )*/
+        )
 
     fun changeLocation(location: Location?) {
         _currentParent.value = location
@@ -88,8 +92,8 @@ class OverviewViewModel(
 
 
 
-    private var _currentAssets = mutableStateOf<DataFetcher<List<Asset>>>(DataFetcher.Fetching)
-    val currentAssets: DataFetcher<List<Asset>> get() = _currentAssets.value
+    //private var _currentAssets = mutableStateOf<DataFetcher<List<Asset>>>(DataFetcher.Fetching)
+    //val currentAssets: DataFetcher<List<Asset>> get() = _currentAssets.value
 
 
     //region Assets
