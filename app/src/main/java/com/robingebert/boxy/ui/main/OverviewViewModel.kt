@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -30,23 +29,31 @@ class OverviewViewModel(
 
     private val _currentParent = MutableStateFlow<Location?>(null)
     val currentParent: StateFlow<Location?> = _currentParent.asStateFlow()
+    val currentGrandParent: StateFlow<Location?> = _currentParent
 
     val hasParentLocation: Boolean get() = _currentParent.value != null
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val currentLocations: StateFlow<DataFetcher<List<LocationNode>>> = _currentParent
-        .flatMapLatest { parent ->
-            locationRepository.tree(parent?.id)
-                .map { DataFetcher.Data(it) as DataFetcher<List<LocationNode>> }
-                .onStart { emit(DataFetcher.Fetching) }
+    fun changeLocation(location: Location?) {
+        _currentParent.value = location
+    }
+
+    fun navigateUp() {
+        val currentLoc = _currentParent.value
+        if (currentLoc != null) {
+            viewModelScope.launch {
+                if (currentLoc.parentId == null) {
+                    changeLocation(null)
+                } else {
+                    val allLocations = locationRepository.getAll()
+                    val parentLoc = allLocations.find { it.id == currentLoc.parentId }
+                    changeLocation(parentLoc)
+                }
+            }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DataFetcher.Fetching
-        )
+    }
 
 
+    //region Assets
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentAssets: StateFlow<DataFetcher<List<Asset>>> = _currentParent
         .flatMapLatest { parent ->
@@ -71,32 +78,6 @@ class OverviewViewModel(
             initialValue = DataFetcher.Fetching
         )
 
-    fun changeLocation(location: Location?) {
-        _currentParent.value = location
-    }
-
-    fun navigateUp() {
-        val currentLoc = _currentParent.value
-        if (currentLoc != null) {
-            viewModelScope.launch {
-                if (currentLoc.parentId == null) {
-                    changeLocation(null)
-                } else {
-                    val allLocations = locationRepository.getAll()
-                    val parentLoc = allLocations.find { it.id == currentLoc.parentId }
-                    changeLocation(parentLoc)
-                }
-            }
-        }
-    }
-
-
-
-    //private var _currentAssets = mutableStateOf<DataFetcher<List<Asset>>>(DataFetcher.Fetching)
-    //val currentAssets: DataFetcher<List<Asset>> get() = _currentAssets.value
-
-
-    //region Assets
     fun newAsset(): Asset? {
         return _currentParent.value?.let {
             Asset(
@@ -122,6 +103,19 @@ class OverviewViewModel(
     //endregion
 
     //region Locations
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentLocations: StateFlow<DataFetcher<List<LocationNode>>> = _currentParent
+        .flatMapLatest { parent ->
+            locationRepository.tree(parent?.id)
+                .map { DataFetcher.Data(it) as DataFetcher<List<LocationNode>> }
+                .onStart { emit(DataFetcher.Fetching) }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DataFetcher.Fetching
+        )
+
     fun newLocation(): Location {
         return Location(
             id = locationRepository.size().toLong(),

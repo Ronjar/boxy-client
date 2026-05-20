@@ -1,11 +1,13 @@
-package com.robingebert.boxy.ui.main.composables
+package com.robingebert.boxy.ui.main.composables.location
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -13,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,25 +27,37 @@ fun LocationCard(
     modifier: Modifier = Modifier,
     location: Location,
     compact: Boolean = true,
+    isHome: Boolean = false,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.fillMaxWidth().combinedClickable(
-            onClick = onClick,
-            onLongClick = onLongClick
-        ),
+        modifier = modifier
+            .clip(shape = RoundedCornerShape(15.dp))
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
+        shape = RoundedCornerShape(15.dp)
     ) {
         if (compact) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                
-                ImageWithPlaceholder(
-                    modifier = Modifier.size(48.dp),
-                    imageName = location.picture
-                )
+                if (isHome) {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
+                    )
+                } else {
+                    ImageWithPlaceholder(
+                        modifier = Modifier.size(48.dp),
+                        imageName = location.picture
+                    )
+                }
                 Text(
                     text = location.name,
                     modifier = Modifier.weight(1f),
@@ -51,10 +66,18 @@ fun LocationCard(
             }
         } else {
             Column {
-                ImageWithPlaceholder(
-                    modifier = Modifier.size(120.dp),
-                    imageName = location.picture
-                )
+                if (isHome) {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = null,
+                        modifier = Modifier.size(120.dp)
+                    )
+                } else {
+                    ImageWithPlaceholder(
+                        modifier = Modifier.size(120.dp),
+                        imageName = location.picture
+                    )
+                }
                 Text(
                     text = location.name,
                     fontWeight = FontWeight.Bold
@@ -67,8 +90,9 @@ fun LocationCard(
 @Composable
 fun ImageWithPlaceholder(
     modifier: Modifier = Modifier,
-    imageName: String?
+    imageName: String?,
 ) {
+
     if (imageName != null) {
         CoilImage(
             modifier = modifier,

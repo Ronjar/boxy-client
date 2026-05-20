@@ -25,17 +25,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.models.Asset
 import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.ui.common.EditOptionsDialogState
-import com.robingebert.boxy.ui.main.composables.AssetCard
-import com.robingebert.boxy.ui.main.composables.AssetModal
-import com.robingebert.boxy.ui.main.composables.LocationCard
+import com.robingebert.boxy.ui.main.composables.assets.AssetCard
+import com.robingebert.boxy.ui.main.composables.assets.AssetModal
+import com.robingebert.boxy.ui.main.composables.location.LocationCard
 import com.robingebert.boxy.ui.main.composables.FabMenu
-import com.robingebert.boxy.ui.main.composables.LocationModal
+import com.robingebert.boxy.ui.main.composables.assets.AssetOption
+import com.robingebert.boxy.ui.main.composables.assets.AssetOptionsBottomSheet
+import com.robingebert.boxy.ui.main.composables.location.LocationModal
+import com.robingebert.boxy.ui.main.composables.location.LocationOption
+import com.robingebert.boxy.ui.main.composables.location.LocationOptionsBottomSheet
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -50,6 +55,7 @@ fun OverviewScreen(
 
     val locations by viewModel.currentLocations.collectAsStateWithLifecycle()
     val currentParent by viewModel.currentParent.collectAsStateWithLifecycle()
+    val currentGrandParent by viewModel.currentGrandParent.collectAsStateWithLifecycle()
     val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
 
     var assetDialogState by remember {
@@ -115,23 +121,26 @@ fun OverviewScreen(
                     is DataFetcher.Fetching -> item { Text("Loading...") }
                     is DataFetcher.Error -> item { Text("Error") }
                     is DataFetcher.Data -> {
-                        items(state.data) { location ->
-                            currentParent?.let {
+                        currentParent?.let {
+                            item {
                                 LocationCard(
-                                    modifier = Modifier.padding(8.dp),
+                                    modifier = Modifier.padding(8.dp).alpha(0.6f),
                                     location = it,
                                     compact = true,
                                 ) {
                                     viewModel.navigateUp()
                                 }
                             }
+                        }
+
+                        items(state.data) { location ->
                             LocationCard(
                                 modifier = Modifier.padding(8.dp),
                                 location = location.location,
                                 compact = true,
                                 onLongClick = {
                                     locationDialogState =
-                                        EditOptionsDialogState.Edit(location.location)
+                                        EditOptionsDialogState.Options(location.location)
                                 }
                             ) {
                                 viewModel.changeLocation(location.location)
@@ -159,7 +168,7 @@ fun OverviewScreen(
                                 modifier = Modifier.padding(8.dp),
                                 asset = asset,
                             ) {
-                                assetDialogState = EditOptionsDialogState.Edit(asset)
+                                assetDialogState = EditOptionsDialogState.Options(asset)
                             }
                         }
                     }
@@ -180,6 +189,23 @@ fun OverviewScreen(
             )
         }
 
+        is EditOptionsDialogState.Options -> {
+            AssetOptionsBottomSheet(
+                onDismiss = { assetDialogState = EditOptionsDialogState.None }
+            ) {
+                when (it) {
+                    AssetOption.EDIT -> {
+                        assetDialogState = EditOptionsDialogState.Edit(state.data)
+                    }
+
+                    AssetOption.DELETE -> {
+                        viewModel.removeAsset(state.data)
+                        assetDialogState = EditOptionsDialogState.None
+                    }
+                }
+            }
+        }
+
         else -> {}
     }
 
@@ -193,6 +219,23 @@ fun OverviewScreen(
                     locationDialogState = EditOptionsDialogState.None
                 }
             )
+        }
+
+        is EditOptionsDialogState.Options -> {
+            LocationOptionsBottomSheet(
+                onDismiss = { locationDialogState = EditOptionsDialogState.None }
+            ) {
+                when (it) {
+                    LocationOption.EDIT -> {
+                        locationDialogState = EditOptionsDialogState.Edit(state.data)
+                    }
+
+                    LocationOption.DELETE -> {
+                        viewModel.removeLocation(state.data)
+                        locationDialogState = EditOptionsDialogState.None
+                    }
+                }
+            }
         }
 
         else -> {}

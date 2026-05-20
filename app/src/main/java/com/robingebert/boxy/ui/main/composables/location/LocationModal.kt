@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables
+package com.robingebert.boxy.ui.main.composables.location
 
 import android.content.Context
 import android.net.Uri
@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Button

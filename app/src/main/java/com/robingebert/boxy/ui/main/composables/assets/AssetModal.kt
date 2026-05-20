@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables
+package com.robingebert.boxy.ui.main.composables.assets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +28,7 @@ import com.robingebert.boxy.ui.common.composables.IconRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssetModal(modifier: Modifier = Modifier, asset: Asset, onDismiss: () -> Unit, onSave: (Asset) -> Unit) {
+fun AssetModal(asset: Asset, onDismiss: () -> Unit, onSave: (Asset) -> Unit) {
     var name by remember { mutableStateOf(asset.name) }
     fun save() {
         onSave(asset.copy(name = name))
