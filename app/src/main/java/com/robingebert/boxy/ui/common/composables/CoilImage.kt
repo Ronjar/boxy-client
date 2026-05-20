@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,10 +86,30 @@ fun CoilImage(
                 .clip(RoundedCornerShape(8.dp)),
             model = imageFile,
             contentDescription = contentDescription,
-            contentScale = ContentScale.FillHeight,
+            contentScale = ContentScale.Crop,
             onSuccess = {
                 isLoading = false
             }
+        )
+    }
+}
+
+@Composable
+fun ImageWithPlaceholder(
+    modifier: Modifier = Modifier,
+    imageName: String?,
+) {
+
+    if (imageName != null) {
+        CoilImage(
+            modifier = modifier,
+            name = imageName,
+        )
+    } else {
+        Icon(
+            modifier = modifier,
+            imageVector = Icons.Default.Inventory,
+            contentDescription = null,
         )
     }
 }

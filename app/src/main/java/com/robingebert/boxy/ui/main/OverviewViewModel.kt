@@ -22,6 +22,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
 
+
+sealed interface UpNavigationTarget {
+    data object Home : UpNavigationTarget
+    data class Folder(val location: Location) : UpNavigationTarget
+}
+
 class OverviewViewModel(
     private val locationRepository: LocationRepository,
     private val assetRepository: AssetRepository
@@ -33,24 +39,41 @@ class OverviewViewModel(
 
     val hasParentLocation: Boolean get() = _currentParent.value != null
 
-    fun changeLocation(location: Location?) {
+    private val _breadcrumbs = MutableStateFlow<List<Location>>(emptyList())
+    val breadcrumbs: StateFlow<List<Location>> = _breadcrumbs.asStateFlow()
+
+    fun navigateDown(location: Location) {
+        val currentPath = _breadcrumbs.value.toMutableList()
+        currentPath.add(location)
+        _breadcrumbs.value = currentPath
         _currentParent.value = location
     }
 
     fun navigateUp() {
-        val currentLoc = _currentParent.value
-        if (currentLoc != null) {
-            viewModelScope.launch {
-                if (currentLoc.parentId == null) {
-                    changeLocation(null)
-                } else {
-                    val allLocations = locationRepository.getAll()
-                    val parentLoc = allLocations.find { it.id == currentLoc.parentId }
-                    changeLocation(parentLoc)
+        val currentPath = _breadcrumbs.value.toMutableList()
+        if (currentPath.isNotEmpty()) {
+            currentPath.removeAt(currentPath.lastIndex)
+            _breadcrumbs.value = currentPath
+            _currentParent.value = currentPath.lastOrNull()
+        }
+    }
+
+    val upNavigationTarget: StateFlow<UpNavigationTarget?> = _breadcrumbs
+        .map { path ->
+            when (path.size) {
+                0 -> null
+                1 -> UpNavigationTarget.Home
+                else -> {
+                    val grandParent = path[path.size - 2]
+                    UpNavigationTarget.Folder(grandParent)
                 }
             }
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
 
     //region Assets

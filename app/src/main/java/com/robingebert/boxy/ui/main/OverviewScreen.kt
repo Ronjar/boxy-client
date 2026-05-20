@@ -1,6 +1,8 @@
 package com.robingebert.boxy.ui.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -24,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
@@ -32,12 +36,13 @@ import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.models.Asset
 import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.ui.common.EditOptionsDialogState
+import com.robingebert.boxy.ui.main.composables.FabMenu
 import com.robingebert.boxy.ui.main.composables.assets.AssetCard
 import com.robingebert.boxy.ui.main.composables.assets.AssetModal
-import com.robingebert.boxy.ui.main.composables.location.LocationCard
-import com.robingebert.boxy.ui.main.composables.FabMenu
 import com.robingebert.boxy.ui.main.composables.assets.AssetOption
 import com.robingebert.boxy.ui.main.composables.assets.AssetOptionsBottomSheet
+import com.robingebert.boxy.ui.main.composables.location.HomeCard
+import com.robingebert.boxy.ui.main.composables.location.LocationCard
 import com.robingebert.boxy.ui.main.composables.location.LocationModal
 import com.robingebert.boxy.ui.main.composables.location.LocationOption
 import com.robingebert.boxy.ui.main.composables.location.LocationOptionsBottomSheet
@@ -54,8 +59,8 @@ fun OverviewScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val locations by viewModel.currentLocations.collectAsStateWithLifecycle()
-    val currentParent by viewModel.currentParent.collectAsStateWithLifecycle()
-    val currentGrandParent by viewModel.currentGrandParent.collectAsStateWithLifecycle()
+    val breadcrumbs by viewModel.breadcrumbs.collectAsStateWithLifecycle()
+    val upNavigationTarget by viewModel.upNavigationTarget.collectAsStateWithLifecycle()
     val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
 
     var assetDialogState by remember {
@@ -70,7 +75,7 @@ fun OverviewScreen(
     }
 
 
-    BackHandler(viewModel.hasParentLocation) { viewModel.navigateUp() }
+    BackHandler(breadcrumbs.isNotEmpty()) { viewModel.navigateUp() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -89,7 +94,14 @@ fun OverviewScreen(
                 }
             )
         },
-        floatingActionButton = {
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.BottomEnd
+        ) {
             FabMenu(
                 onNewAsset = {
                     viewModel.newAsset()?.let {
@@ -98,77 +110,92 @@ fun OverviewScreen(
                 },
                 onNewLocation = {
                     locationDialogState = EditOptionsDialogState.Edit(viewModel.newLocation())
-                }
+                },
+                showAsset = breadcrumbs.isNotEmpty()
             )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Locations"
-            )
-            LazyVerticalGrid(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                columns = GridCells.Fixed(3)
+                    .fillMaxSize()
             ) {
-                when (val state = locations) {
-                    is DataFetcher.Fetching -> item { Text("Loading...") }
-                    is DataFetcher.Error -> item { Text("Error") }
-                    is DataFetcher.Data -> {
-                        currentParent?.let {
-                            item {
-                                LocationCard(
-                                    modifier = Modifier.padding(8.dp).alpha(0.6f),
-                                    location = it,
-                                    compact = true,
-                                ) {
-                                    viewModel.navigateUp()
+
+                val breadcrumbText = breadcrumbs.joinToString(separator = "") { "${it.name} / " }
+                Text(
+                    modifier = Modifier.padding(horizontal = 12.dp).alpha(0.8f),
+                    text = "Home / $breadcrumbText",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    columns = GridCells.Fixed(3)
+                ) {
+                    when (val state = locations) {
+                        is DataFetcher.Fetching -> item { Text("Loading...") }
+                        is DataFetcher.Error -> item { Text("Error") }
+                        is DataFetcher.Data -> {
+                            upNavigationTarget?.let {
+                                if (it is UpNavigationTarget.Folder) {
+                                    item {
+                                        LocationCard(
+                                            modifier = Modifier.alpha(0.8f),
+                                            location = it.location,
+                                            compact = true,
+                                        ) {
+                                            viewModel.navigateUp()
+                                        }
+                                    }
+                                } else {
+                                    item {
+                                        HomeCard(
+                                            modifier = Modifier.alpha(0.6f),
+                                            compact = true,
+                                        ) {
+                                            viewModel.navigateUp()
+                                        }
+                                    }
                                 }
                             }
-                        }
-
-                        items(state.data) { location ->
-                            LocationCard(
-                                modifier = Modifier.padding(8.dp),
-                                location = location.location,
-                                compact = true,
-                                onLongClick = {
-                                    locationDialogState =
-                                        EditOptionsDialogState.Options(location.location)
+                            items(state.data) { location ->
+                                LocationCard(
+                                    modifier = Modifier.alpha(1f),
+                                    location = location.location,
+                                    compact = true,
+                                    onLongClick = {
+                                        locationDialogState =
+                                            EditOptionsDialogState.Options(location.location)
+                                    }
+                                ) {
+                                    viewModel.navigateDown(location.location)
                                 }
-                            ) {
-                                viewModel.changeLocation(location.location)
                             }
                         }
                     }
                 }
-            }
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Assets"
-            )
-            LazyVerticalGrid(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                columns = GridCells.Fixed(3)
-            ) {
-                when (val state = assets) {
-                    is DataFetcher.Fetching -> item { Text("Loading...") }
-                    is DataFetcher.Error -> item { Text("Error") }
-                    is DataFetcher.Data -> {
-                        items(state.data) { asset ->
-                            AssetCard(
-                                modifier = Modifier.padding(8.dp),
-                                asset = asset,
-                            ) {
-                                assetDialogState = EditOptionsDialogState.Options(asset)
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = "Assets"
+                )
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    columns = GridCells.Fixed(1),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    when (val state = assets) {
+                        is DataFetcher.Fetching -> item { Text("Loading...") }
+                        is DataFetcher.Error -> item { Text("Error") }
+                        is DataFetcher.Data -> {
+                            items(state.data) { asset ->
+                                AssetCard(
+                                    asset = asset,
+                                ) {
+                                    assetDialogState = EditOptionsDialogState.Options(asset)
+                                }
                             }
                         }
                     }

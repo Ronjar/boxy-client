@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.robingebert.boxy.domain.models.Asset
 
 @Composable
-fun AssetCard(modifier: Modifier, asset: Asset, onClick: () -> Unit) {
+fun AssetCard(asset: Asset, onClick: () -> Unit) {
     Card(
-        modifier = modifier.clip(shape = RoundedCornerShape(12.dp)),
+        modifier = Modifier.clip(shape = RoundedCornerShape(12.dp)),
         onClick = onClick
     ) {
         Text(modifier = Modifier.padding(8.dp), text = asset.name)

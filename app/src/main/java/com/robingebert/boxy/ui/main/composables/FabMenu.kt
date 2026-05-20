@@ -37,7 +37,7 @@ import androidx.compose.ui.semantics.traversalIndex
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun FabMenu(onNewAsset: () -> Unit = {}, onNewLocation: () -> Unit = {}) {
+fun FabMenu(onNewAsset: () -> Unit = {}, onNewLocation: () -> Unit = {}, showAsset: Boolean) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
@@ -93,13 +93,15 @@ fun FabMenu(onNewAsset: () -> Unit = {}, onNewLocation: () -> Unit = {}) {
             icon = { Icon(Icons.Default.Inventory, contentDescription = null) },
             text = { Text(text = "Add Location") },
         )
-        FloatingActionButtonMenuItem(
-            onClick = {
-                fabMenuExpanded = false
-                onNewAsset()
-            },
-            icon = { Icon(Icons.Default.Blender, contentDescription = null) },
-            text = { Text(text = "Add Asset") },
-        )
+        if (showAsset) {
+            FloatingActionButtonMenuItem(
+                onClick = {
+                    fabMenuExpanded = false
+                    onNewAsset()
+                },
+                icon = { Icon(Icons.Default.Blender, contentDescription = null) },
+                text = { Text(text = "Add Asset") },
+            )
+        }
     }
 }

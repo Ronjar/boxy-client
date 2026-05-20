@@ -3,14 +3,15 @@ package com.robingebert.boxy.ui.main.composables.location
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,12 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robingebert.boxy.domain.models.Location
-import com.robingebert.boxy.ui.common.composables.ImageWithPlaceholder
+import com.robingebert.boxy.ui.common.composables.CoilImage
 
 @Composable
-fun LocationCard(
+fun HomeCard(
     modifier: Modifier = Modifier,
-    location: Location,
     compact: Boolean = true,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit
@@ -45,26 +45,26 @@ fun LocationCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ImageWithPlaceholder(
-                    modifier = Modifier.size(40.dp).padding(4.dp),
-                    imageName = location.picture
+                Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp).padding(4.dp)
                 )
-                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = location.name,
+                    text = "Home",
                     modifier = Modifier.weight(1f),
                     fontWeight = FontWeight.Bold
                 )
             }
         } else {
             Column {
-                ImageWithPlaceholder(
-                    modifier = Modifier.size(120.dp),
-                    imageName = location.picture
+                Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = null,
+                    modifier = Modifier.size(104.dp).padding(8.dp)
                 )
-                Spacer(Modifier.height(8.dp))
                 Text(
-                    text = location.name,
+                    text = "Home",
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -74,28 +74,14 @@ fun LocationCard(
 
 @Preview
 @Composable
-fun LocationCardPreview() {
+fun HomeCardPreview() {
     Column {
-        LocationCard(
-            location = Location(
-                name = "Warehouse",
-                picture = null,
-                id = 1L,
-                updated = "",
-                parentId = null
-            ),
+        HomeCard(
             compact = false,
             onClick = {},
             onLongClick = {}
         )
-        LocationCard(
-            location = Location(
-                name = "Warehouse",
-                picture = null,
-                id = 1L,
-                updated = "",
-                parentId = null
-            ),
+        HomeCard(
             onClick = {},
             onLongClick = {}
         )
