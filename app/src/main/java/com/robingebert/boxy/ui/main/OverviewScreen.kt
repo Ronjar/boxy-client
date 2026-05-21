@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,11 +12,14 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -26,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +67,8 @@ fun OverviewScreen(
     val breadcrumbs by viewModel.breadcrumbs.collectAsStateWithLifecycle()
     val upNavigationTarget by viewModel.upNavigationTarget.collectAsStateWithLifecycle()
     val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
+
+    var compactLocationCards by rememberSaveable { mutableStateOf(true) }
 
     var assetDialogState by remember {
         mutableStateOf<EditOptionsDialogState<Asset>>(
@@ -120,58 +127,77 @@ fun OverviewScreen(
 
                 val breadcrumbText = breadcrumbs.joinToString(separator = "") { "${it.name} / " }
                 Text(
-                    modifier = Modifier.padding(horizontal = 12.dp).alpha(0.8f),
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .alpha(0.8f),
                     text = "Home / $breadcrumbText",
                     style = MaterialTheme.typography.labelMedium
                 )
-                LazyVerticalGrid(
+                Row(
                     modifier = Modifier
+                        .padding(8.dp)
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    columns = GridCells.Fixed(3)
                 ) {
-                    when (val state = locations) {
-                        is DataFetcher.Fetching -> item { Text("Loading...") }
-                        is DataFetcher.Error -> item { Text("Error") }
-                        is DataFetcher.Data -> {
-                            upNavigationTarget?.let {
-                                if (it is UpNavigationTarget.Folder) {
-                                    item {
-                                        LocationCard(
-                                            modifier = Modifier.alpha(0.8f),
-                                            location = it.location,
-                                            compact = true,
-                                        ) {
-                                            viewModel.navigateUp()
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        columns = GridCells.Fixed(3)
+                    ) {
+                        when (val state = locations) {
+                            is DataFetcher.Fetching -> item { Text("Loading...") }
+                            is DataFetcher.Error -> item { Text("Error") }
+                            is DataFetcher.Data -> {
+                                upNavigationTarget?.let {
+                                    if (it is UpNavigationTarget.Folder) {
+                                        item {
+                                            LocationCard(
+                                                modifier = Modifier.alpha(0.8f),
+                                                location = it.location,
+                                                compact = compactLocationCards,
+                                            ) {
+                                                viewModel.navigateUp()
+                                            }
                                         }
-                                    }
-                                } else {
-                                    item {
-                                        HomeCard(
-                                            modifier = Modifier.alpha(0.6f),
-                                            compact = true,
-                                        ) {
-                                            viewModel.navigateUp()
+                                    } else {
+                                        item {
+                                            HomeCard(
+                                                modifier = Modifier.alpha(0.6f),
+                                                compact = compactLocationCards,
+                                            ) {
+                                                viewModel.navigateUp()
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            items(state.data) { location ->
-                                LocationCard(
-                                    modifier = Modifier.alpha(1f),
-                                    location = location.location,
-                                    compact = true,
-                                    onLongClick = {
-                                        locationDialogState =
-                                            EditOptionsDialogState.Options(location.location)
+                                items(state.data) { location ->
+                                    LocationCard(
+                                        modifier = Modifier.alpha(1f),
+                                        location = location.location,
+                                        compact = compactLocationCards,
+                                        onLongClick = {
+                                            locationDialogState =
+                                                EditOptionsDialogState.Options(location.location)
+                                        }
+                                    ) {
+                                        viewModel.navigateDown(location.location)
                                     }
-                                ) {
-                                    viewModel.navigateDown(location.location)
                                 }
                             }
                         }
+                    }
+                    OutlinedIconButton(
+                        onClick = {
+                            compactLocationCards = !compactLocationCards
+                        }
+                    ) {
+                        val icon = if (compactLocationCards) {
+                            Icons.Default.ViewHeadline
+                        } else {
+                            Icons.Default.ViewColumn
+                        }
+                        Icon(imageVector = icon, contentDescription = "Toggle location card size")
                     }
                 }
                 Text(

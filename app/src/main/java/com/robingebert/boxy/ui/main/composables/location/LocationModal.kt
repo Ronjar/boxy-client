@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Save
@@ -31,6 +32,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -45,7 +48,12 @@ import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LocationModal(modifier: Modifier = Modifier, location: Location, onDismiss: () -> Unit, onSave: (Location) -> Unit) {
+fun LocationModal(
+    modifier: Modifier = Modifier,
+    location: Location,
+    onDismiss: () -> Unit,
+    onSave: (Location) -> Unit
+) {
 
     var name by rememberSaveable { mutableStateOf(location.name) }
     var capturedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -60,12 +68,14 @@ fun LocationModal(modifier: Modifier = Modifier, location: Location, onDismiss: 
             capturedImageUri = null
         }
     }
+
     fun save() {
         scope.launch {
             val targetFileName = "${location.id}.jpg"
 
             val finalPictureName = if (capturedImageUri != null) {
-                val savedFile = saveImageToInternalStorage(context, capturedImageUri!!, targetFileName)
+                val savedFile =
+                    saveImageToInternalStorage(context, capturedImageUri!!, targetFileName)
 
                 if (savedFile != null) targetFileName else location.picture
             } else {
@@ -81,7 +91,7 @@ fun LocationModal(modifier: Modifier = Modifier, location: Location, onDismiss: 
     ModalBottomSheet(
         modifier = modifier,
         onDismissRequest = { onDismiss() },
-        dragHandle = {Spacer(Modifier.height(16.dp))}
+        dragHandle = { Spacer(Modifier.height(16.dp)) }
     ) {
         Column(
             modifier = Modifier
@@ -105,10 +115,10 @@ fun LocationModal(modifier: Modifier = Modifier, location: Location, onDismiss: 
                     Button(
                         modifier = Modifier.weight(1f),
                         onClick = {
-                        val uri = getTmpFileUri(context)
-                        capturedImageUri = uri
-                        cameraLauncher.launch(uri)
-                    }) {
+                            val uri = getTmpFileUri(context)
+                            capturedImageUri = uri
+                            cameraLauncher.launch(uri)
+                        }) {
                         Icon(Icons.Rounded.Save, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text("Take picture")
@@ -122,7 +132,13 @@ fun LocationModal(modifier: Modifier = Modifier, location: Location, onDismiss: 
                         AsyncImage(
                             model = it,
                             contentDescription = "Picture of inventory",
-                            modifier = Modifier.size(48.dp).padding(start = 8.dp)
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(start = 8.dp)
+                                .clip(
+                                    RoundedCornerShape(8.dp)
+                                )
                         )
                     }
                 }
