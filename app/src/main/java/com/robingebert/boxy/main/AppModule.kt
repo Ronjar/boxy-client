@@ -7,7 +7,7 @@ import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
 import com.robingebert.boxy.domain.SyncRepository
 import com.robingebert.boxy.ui.auth.AuthViewModel
-import com.robingebert.boxy.ui.main.OverviewViewModel
+import com.robingebert.boxy.ui.overview.OverviewViewModel
 import com.robingebert.boxy.ui.settings.SettingsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
@@ -26,7 +26,15 @@ val viewModelModule = module {
 
 val commonModule = module {
     single { DataStoreManager(androidContext()) }
-    single { BoxyKtorClient() }
+    single {
+        val dataStore = get<DataStoreManager>()
+
+        BoxyKtorClient(
+            getUrl = { dataStore.url.flow.value },
+            getUsername = { dataStore.username.flow.value },
+            getPassword = { dataStore.password.flow.value }
+        )
+    }
 
     // Repositories
     single { AssetRepository(get()) }

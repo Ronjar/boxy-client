@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables
+package com.robingebert.boxy.ui.overview.composables
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons

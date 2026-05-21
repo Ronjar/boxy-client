@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables.location
+package com.robingebert.boxy.ui.overview.composables.assets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -24,16 +24,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
-enum class LocationOption {
+enum class AssetOption {
     EDIT,
     DELETE,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LocationOptionsBottomSheet(
+fun AssetOptionsBottomSheet(
     onDismiss: () -> Unit,
-    onSelected: (LocationOption) -> Unit
+    onSelected: (AssetOption) -> Unit
 ) {
     ModalBottomSheet(
         content = {
@@ -41,13 +41,13 @@ fun LocationOptionsBottomSheet(
                 icon = Icons.Default.Edit,
                 title = "Edit"
             ) {
-                onSelected(LocationOption.EDIT)
+                onSelected(AssetOption.EDIT)
             }
             ListItem(
                 icon = Icons.Default.DeleteForever,
                 title = "Delete"
             ) {
-                onSelected(LocationOption.DELETE)
+                onSelected(AssetOption.DELETE)
             }
 
         },

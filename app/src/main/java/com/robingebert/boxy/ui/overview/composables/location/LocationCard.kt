@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables.location
+package com.robingebert.boxy.ui.overview.composables.location
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column

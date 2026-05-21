@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.robingebert.boxy.ui.auth.AuthScreen
-import com.robingebert.boxy.ui.main.OverviewScreen
+import com.robingebert.boxy.ui.overview.OverviewScreen
 import com.robingebert.boxy.ui.settings.SettingsScreen
 
 @Composable

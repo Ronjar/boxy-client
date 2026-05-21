@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables.location
+package com.robingebert.boxy.ui.overview.composables.location
 
 import android.content.Context
 import android.net.Uri

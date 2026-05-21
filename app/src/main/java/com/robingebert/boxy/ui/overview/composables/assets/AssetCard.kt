@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main.composables.assets
+package com.robingebert.boxy.ui.overview.composables.assets
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape

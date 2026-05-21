@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main
+package com.robingebert.boxy.ui.overview
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -41,16 +41,16 @@ import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.models.Asset
 import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.ui.common.EditOptionsDialogState
-import com.robingebert.boxy.ui.main.composables.FabMenu
-import com.robingebert.boxy.ui.main.composables.assets.AssetCard
-import com.robingebert.boxy.ui.main.composables.assets.AssetModal
-import com.robingebert.boxy.ui.main.composables.assets.AssetOption
-import com.robingebert.boxy.ui.main.composables.assets.AssetOptionsBottomSheet
-import com.robingebert.boxy.ui.main.composables.location.HomeCard
-import com.robingebert.boxy.ui.main.composables.location.LocationCard
-import com.robingebert.boxy.ui.main.composables.location.LocationModal
-import com.robingebert.boxy.ui.main.composables.location.LocationOption
-import com.robingebert.boxy.ui.main.composables.location.LocationOptionsBottomSheet
+import com.robingebert.boxy.ui.overview.composables.FabMenu
+import com.robingebert.boxy.ui.overview.composables.assets.AssetCard
+import com.robingebert.boxy.ui.overview.composables.assets.AssetModal
+import com.robingebert.boxy.ui.overview.composables.assets.AssetOption
+import com.robingebert.boxy.ui.overview.composables.assets.AssetOptionsBottomSheet
+import com.robingebert.boxy.ui.overview.composables.location.HomeCard
+import com.robingebert.boxy.ui.overview.composables.location.LocationCard
+import com.robingebert.boxy.ui.overview.composables.location.LocationModal
+import com.robingebert.boxy.ui.overview.composables.location.LocationOption
+import com.robingebert.boxy.ui.overview.composables.location.LocationOptionsBottomSheet
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 

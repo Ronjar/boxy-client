@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.main
+package com.robingebert.boxy.ui.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
