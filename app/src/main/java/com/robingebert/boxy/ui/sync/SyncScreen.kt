@@ -1,8 +1,8 @@
-package com.robingebert.boxy.ui.auth
+package com.robingebert.boxy.ui.sync
 
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AuthScreen(viewModel: AuthViewModel = koinViewModel()) {
+fun SyncScreen(viewModel: SyncViewModel = koinViewModel()) {
 }

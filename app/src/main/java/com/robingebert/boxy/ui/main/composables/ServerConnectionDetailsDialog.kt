@@ -16,6 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 
 @Composable
 fun ServerConnectionDetailsDialog(
@@ -31,13 +35,26 @@ fun ServerConnectionDetailsDialog(
     var connectionPossible by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(url) {
+        connectionPossible = withContext(Dispatchers.IO) {
+            try {
+                val url = URL(url)
+                val connection = url.openConnection() as HttpURLConnection
 
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 3000
+                connection.readTimeout = 3000
+
+                connection.responseCode == 418
+            } catch (_: Exception) {
+                false
+            }
+        }
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Server-Verbindung")
+            Text(text = "Connection to Service")
         },
         text = {
             Column(
@@ -49,13 +66,21 @@ fun ServerConnectionDetailsDialog(
                     onValueChange = { url = it },
                     label = { Text("Server URL") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = connectionPossible == false,
+                    supportingText = {
+                        if (connectionPossible == false) {
+                            Text("Unable to connect to the Server")
+                        } else if (connectionPossible == true) {
+                            Text("Connection successful")
+                        }
+                    }
                 )
 
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Benutzername") },
+                    label = { Text("Username") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -63,7 +88,7 @@ fun ServerConnectionDetailsDialog(
                 OutlinedTextField(
                     value = token,
                     onValueChange = { token = it },
-                    label = { Text("Token") },
+                    label = { Text("Password") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -72,7 +97,6 @@ fun ServerConnectionDetailsDialog(
         confirmButton = {
             Button(
                 onClick = { onConnect(url, username, token) },
-                // Button nur aktivieren, wenn alle Felder gefüllt sind
                 enabled = url.isNotBlank() && username.isNotBlank() && token.isNotBlank()
             ) {
                 Text("Verbinden")

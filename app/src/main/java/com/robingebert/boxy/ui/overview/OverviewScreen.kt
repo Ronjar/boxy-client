@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ViewColumn
 import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +49,7 @@ import com.robingebert.boxy.ui.overview.composables.assets.AssetOption
 import com.robingebert.boxy.ui.overview.composables.assets.AssetOptionsBottomSheet
 import com.robingebert.boxy.ui.overview.composables.location.HomeCard
 import com.robingebert.boxy.ui.overview.composables.location.LocationCard
+import com.robingebert.boxy.ui.overview.composables.location.LocationGrid
 import com.robingebert.boxy.ui.overview.composables.location.LocationModal
 import com.robingebert.boxy.ui.overview.composables.location.LocationOption
 import com.robingebert.boxy.ui.overview.composables.location.LocationOptionsBottomSheet
@@ -68,8 +70,6 @@ fun OverviewScreen(
     val upNavigationTarget by viewModel.upNavigationTarget.collectAsStateWithLifecycle()
     val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
 
-    var compactLocationCards by rememberSaveable { mutableStateOf(true) }
-
     var assetDialogState by remember {
         mutableStateOf<EditOptionsDialogState<Asset>>(
             EditOptionsDialogState.None
@@ -80,7 +80,6 @@ fun OverviewScreen(
             EditOptionsDialogState.None
         )
     }
-
 
     BackHandler(breadcrumbs.isNotEmpty()) { viewModel.navigateUp() }
 
@@ -95,6 +94,14 @@ fun OverviewScreen(
                     }) {
                         Icon(
                             Icons.Rounded.Settings,
+                            null
+                        )
+                    }
+                    IconButton(onClick = {
+
+                    }) {
+                        Icon(
+                            Icons.Rounded.Sync,
                             null
                         )
                     }
@@ -124,82 +131,17 @@ fun OverviewScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-
-                val breadcrumbText = breadcrumbs.joinToString(separator = "") { "${it.name} / " }
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .alpha(0.8f),
-                    text = "Home / $breadcrumbText",
-                    style = MaterialTheme.typography.labelMedium
-                )
-                Row(
+                LocationGrid(
                     modifier = Modifier
                         .padding(8.dp)
-                        .fillMaxWidth()
-                ) {
-                    LazyVerticalGrid(
-                        modifier = Modifier
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        columns = GridCells.Fixed(3)
-                    ) {
-                        when (val state = locations) {
-                            is DataFetcher.Fetching -> item { Text("Loading...") }
-                            is DataFetcher.Error -> item { Text("Error") }
-                            is DataFetcher.Data -> {
-                                upNavigationTarget?.let {
-                                    if (it is UpNavigationTarget.Folder) {
-                                        item {
-                                            LocationCard(
-                                                modifier = Modifier.alpha(0.8f),
-                                                location = it.location,
-                                                compact = compactLocationCards,
-                                            ) {
-                                                viewModel.navigateUp()
-                                            }
-                                        }
-                                    } else {
-                                        item {
-                                            HomeCard(
-                                                modifier = Modifier.alpha(0.6f),
-                                                compact = compactLocationCards,
-                                            ) {
-                                                viewModel.navigateUp()
-                                            }
-                                        }
-                                    }
-                                }
-                                items(state.data) { location ->
-                                    LocationCard(
-                                        modifier = Modifier.alpha(1f),
-                                        location = location.location,
-                                        compact = compactLocationCards,
-                                        onLongClick = {
-                                            locationDialogState =
-                                                EditOptionsDialogState.Options(location.location)
-                                        }
-                                    ) {
-                                        viewModel.navigateDown(location.location)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    OutlinedIconButton(
-                        onClick = {
-                            compactLocationCards = !compactLocationCards
-                        }
-                    ) {
-                        val icon = if (compactLocationCards) {
-                            Icons.Default.ViewHeadline
-                        } else {
-                            Icons.Default.ViewColumn
-                        }
-                        Icon(imageVector = icon, contentDescription = "Toggle location card size")
-                    }
-                }
+                        .fillMaxWidth(),
+                    breadcrumbs = breadcrumbs,
+                    upNavigationTarget = upNavigationTarget,
+                    locations = locations,
+                    onNavigateUp = { viewModel.navigateUp() },
+                    onNavigateDown = { viewModel.navigateDown(it) },
+                    onEditLocation = { locationDialogState = EditOptionsDialogState.Options(it) }
+                )
                 Text(
                     modifier = Modifier.padding(8.dp),
                     text = "Assets"

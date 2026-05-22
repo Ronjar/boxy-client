@@ -6,7 +6,7 @@ import com.robingebert.boxy.data.network.BoxyKtorClient
 import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
 import com.robingebert.boxy.domain.SyncRepository
-import com.robingebert.boxy.ui.auth.AuthViewModel
+import com.robingebert.boxy.ui.sync.SyncViewModel
 import com.robingebert.boxy.ui.overview.OverviewViewModel
 import com.robingebert.boxy.ui.settings.SettingsViewModel
 import org.koin.android.ext.koin.androidContext
@@ -21,7 +21,7 @@ object AppModule {
 val viewModelModule = module {
     viewModelOf(::SettingsViewModel)
     viewModelOf(::OverviewViewModel)
-    viewModelOf(::AuthViewModel)
+    viewModelOf(::SyncViewModel)
 }
 
 val commonModule = module {

@@ -11,14 +11,15 @@ kotlinxSerializationJson = "1.11.0"
 composeBom = "2026.04.01"
 material3 = "1.5.0-alpha18"
 
-ktor = "3.4.3"
+ktor = "3.5.0"
 koin = "4.2.1"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 lifecycle = "2.10.0"
 navigationCompose = "2.9.8"
 datastore = "1.2.1"
 compose-settings = "3.1.0"
 coil = "3.4.0"
+material3Navigation = "1.0.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,6 +51,8 @@ androidx-datastore = {group = "androidx.datastore", name = "datastore-preference
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastore" }
 composeSettings-ui = { group = "com.github.alorma.compose-settings", name = "ui-tiles", version.ref="compose-settings" }
 composeSettings-ui-extended = { group = "com.github.alorma.compose-settings", name = "ui-tiles-extended", version.ref = "compose-settings" }
+material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version.ref = "material3Navigation" }
+
 
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }

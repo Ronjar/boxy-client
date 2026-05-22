@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.composeSettings.ui)
     implementation(libs.composeSettings.ui.extended)
+    implementation(libs.material3.navigation)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
