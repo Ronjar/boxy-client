@@ -2,6 +2,7 @@ package com.robingebert.boxy.ui.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robingebert.boxy.data.DataStoreManager
 import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
@@ -29,6 +30,7 @@ sealed interface UpNavigationTarget {
 }
 
 class OverviewViewModel(
+    private val dataStoreManager: DataStoreManager,
     private val locationRepository: LocationRepository,
     private val assetRepository: AssetRepository
 ) : ViewModel() {
@@ -76,6 +78,10 @@ class OverviewViewModel(
         )
 
 
+    fun changed(){
+        dataStoreManager.localChanges.set(true)
+    }
+
     //region Assets
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentAssets: StateFlow<DataFetcher<List<Asset>>> = _currentParent
@@ -114,12 +120,14 @@ class OverviewViewModel(
     fun saveAsset(asset: Asset) {
         viewModelScope.launch {
             assetRepository.upsert(asset)
+            changed()
         }
     }
 
     fun removeAsset(asset: Asset) {
         viewModelScope.launch {
             assetRepository.remove(asset.id)
+            changed()
         }
     }
 
@@ -152,12 +160,14 @@ class OverviewViewModel(
     fun saveLocation(location: Location) {
         viewModelScope.launch {
             locationRepository.upsert(location)
+            changed()
         }
     }
 
     fun removeLocation(location: Location) {
         viewModelScope.launch {
             locationRepository.remove(location.id)
+            changed()
         }
     }
     //endregion

@@ -7,7 +7,7 @@ sealed class Screen {
     @Serializable
     data object Main : Screen()
     @Serializable
-    data object Auth : Screen()
+    data object Sync : Screen()
     @Serializable
     data object Settings : Screen()
 }

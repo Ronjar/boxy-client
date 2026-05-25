@@ -22,6 +22,10 @@ class StorageApi(private val client: HttpClient) {
         return client.get("versions").body()
     }
 
+    suspend fun getLatestVersionTag(): String {
+        return client.get("latest").body()
+    }
+
     suspend fun downloadTaggedVersion(versionTag: String): ByteArray {
         return client.get(versionTag).body()
     }

@@ -23,17 +23,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.robingebert.boxy.ui.common.composables.shimmerLoading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 
 @Composable
-fun ConnectionCard(modifier: Modifier = Modifier, url: String, username: String, onConnectionSettings: () -> Unit) {
+fun ConnectionCard(
+    modifier: Modifier = Modifier,
+    url: String,
+    username: String,
+    onConnectionSettings: () -> Unit
+) {
     val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
     var connectionPossible by remember { mutableStateOf<Boolean?>(false) }
 
     LaunchedEffect(url) {
+        connectionPossible = null
         connectionPossible = withContext(Dispatchers.IO) {
             try {
                 val url = URL(url)
@@ -51,7 +58,8 @@ fun ConnectionCard(modifier: Modifier = Modifier, url: String, username: String,
     }
 
     Card(
-        modifier = modifier, colors = CardDefaults.cardColors(
+        modifier = modifier.shimmerLoading(isLoading = connectionPossible == null),
+        colors = CardDefaults.cardColors(
             when (connectionPossible) {
                 true -> Color.Green
                 false -> Color.Red
@@ -59,7 +67,10 @@ fun ConnectionCard(modifier: Modifier = Modifier, url: String, username: String,
             }.copy(alpha = 0.5f)
         )
     ) {
-        Row(modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -68,8 +79,12 @@ fun ConnectionCard(modifier: Modifier = Modifier, url: String, username: String,
                     false -> "Connection not possible"
                     null -> "Checking connection..."
                 }
-                Text(text = text)
-                Text(text = url, style = MaterialTheme.typography.labelSmall)
+                if (url.isBlank()) {
+                    Text(text = "No server configured")
+                } else {
+                    Text(text = text)
+                    Text(text = url, style = MaterialTheme.typography.labelSmall)
+                }
             }
             FilledTonalIconButton(
                 onClick = onConnectionSettings,
@@ -77,7 +92,10 @@ fun ConnectionCard(modifier: Modifier = Modifier, url: String, username: String,
                     containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.2f)
                 )
             ) {
-                Icon(imageVector = Icons.Default.Settings, contentDescription = "Connection Settings")
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Connection Settings"
+                )
             }
         }
     }

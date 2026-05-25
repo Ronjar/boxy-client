@@ -4,9 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.robingebert.boxy.ui.main.composables.MainLayout
 import com.robingebert.boxy.ui.main.composables.ServerConnectionDetailsDialog
 import com.robingebert.boxy.ui.navigation.AppNavigation
 import com.robingebert.boxy.ui.theme.BoxyTheme
@@ -27,6 +31,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val loginData by deepLinkData.collectAsState()
 
+            val localChanges by viewModel.localChanges.collectAsStateWithLifecycle()
+
             BoxyTheme {
                 if (loginData != null) {
                     ServerConnectionDetailsDialog(
@@ -42,7 +48,14 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-                AppNavigation(navController = navController)
+
+                MainLayout(
+                    modifier = Modifier.fillMaxSize(),
+                    navController = navController,
+                    hasLocalChanges = localChanges
+                ) {
+                    AppNavigation(navController = navController)
+                }
             }
         }
         handleDeepLink()

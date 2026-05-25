@@ -4,38 +4,21 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ViewColumn
-import androidx.compose.material.icons.filled.ViewHeadline
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robingebert.boxy.data.network.DataFetcher
@@ -47,23 +30,17 @@ import com.robingebert.boxy.ui.overview.composables.assets.AssetCard
 import com.robingebert.boxy.ui.overview.composables.assets.AssetModal
 import com.robingebert.boxy.ui.overview.composables.assets.AssetOption
 import com.robingebert.boxy.ui.overview.composables.assets.AssetOptionsBottomSheet
-import com.robingebert.boxy.ui.overview.composables.location.HomeCard
-import com.robingebert.boxy.ui.overview.composables.location.LocationCard
 import com.robingebert.boxy.ui.overview.composables.location.LocationGrid
 import com.robingebert.boxy.ui.overview.composables.location.LocationModal
 import com.robingebert.boxy.ui.overview.composables.location.LocationOption
 import com.robingebert.boxy.ui.overview.composables.location.LocationOptionsBottomSheet
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OverviewScreen(
-    viewModel: OverviewViewModel = koinViewModel(),
-    onSettingsClicked: () -> Unit
+    viewModel: OverviewViewModel = koinViewModel()
 ) {
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val locations by viewModel.currentLocations.collectAsStateWithLifecycle()
     val breadcrumbs by viewModel.breadcrumbs.collectAsStateWithLifecycle()
@@ -83,87 +60,58 @@ fun OverviewScreen(
 
     BackHandler(breadcrumbs.isNotEmpty()) { viewModel.navigateUp() }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text("Locations") },
-                actions = {
-                    IconButton(onClick = {
-                        scope.launch { onSettingsClicked() }
-                    }) {
-                        Icon(
-                            Icons.Rounded.Settings,
-                            null
-                        )
-                    }
-                    IconButton(onClick = {
-
-                    }) {
-                        Icon(
-                            Icons.Rounded.Sync,
-                            null
-                        )
-                    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FabMenu(
+            onNewAsset = {
+                viewModel.newAsset()?.let {
+                    assetDialogState = EditOptionsDialogState.Edit(it)
                 }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { paddingValues ->
-        Box(
+            },
+            onNewLocation = {
+                locationDialogState = EditOptionsDialogState.Edit(viewModel.newLocation())
+            },
+            showAsset = breadcrumbs.isNotEmpty()
+        )
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.BottomEnd
         ) {
-            FabMenu(
-                onNewAsset = {
-                    viewModel.newAsset()?.let {
-                        assetDialogState = EditOptionsDialogState.Edit(it)
-                    }
-                },
-                onNewLocation = {
-                    locationDialogState = EditOptionsDialogState.Edit(viewModel.newLocation())
-                },
-                showAsset = breadcrumbs.isNotEmpty()
-            )
-            Column(
+            LocationGrid(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                breadcrumbs = breadcrumbs,
+                upNavigationTarget = upNavigationTarget,
+                locations = locations,
+                onNavigateUp = { viewModel.navigateUp() },
+                onNavigateDown = { viewModel.navigateDown(it) },
+                onEditLocation = { locationDialogState = EditOptionsDialogState.Options(it) }
+            )
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = "Assets"
+            )
+            LazyVerticalGrid(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                columns = GridCells.Fixed(1),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                LocationGrid(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    breadcrumbs = breadcrumbs,
-                    upNavigationTarget = upNavigationTarget,
-                    locations = locations,
-                    onNavigateUp = { viewModel.navigateUp() },
-                    onNavigateDown = { viewModel.navigateDown(it) },
-                    onEditLocation = { locationDialogState = EditOptionsDialogState.Options(it) }
-                )
-                Text(
-                    modifier = Modifier.padding(8.dp),
-                    text = "Assets"
-                )
-                LazyVerticalGrid(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    columns = GridCells.Fixed(1),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    when (val state = assets) {
-                        is DataFetcher.Fetching -> item { Text("Loading...") }
-                        is DataFetcher.Error -> item { Text("Error") }
-                        is DataFetcher.Data -> {
-                            items(state.data) { asset ->
-                                AssetCard(
-                                    asset = asset,
-                                ) {
-                                    assetDialogState = EditOptionsDialogState.Options(asset)
-                                }
+                when (val state = assets) {
+                    is DataFetcher.Fetching -> item { Text("Loading...") }
+                    is DataFetcher.Error -> item { Text("Error") }
+                    is DataFetcher.Data -> {
+                        items(state.data) { asset ->
+                            AssetCard(
+                                asset = asset,
+                            ) {
+                                assetDialogState = EditOptionsDialogState.Options(asset)
                             }
                         }
                     }

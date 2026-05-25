@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.livedata)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
 
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.icons.extended)
@@ -64,7 +65,7 @@ dependencies {
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.composeSettings.ui)
     implementation(libs.composeSettings.ui.extended)
-    implementation(libs.material3.navigation)
+    implementation(libs.compose.shimmer.skeleton)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

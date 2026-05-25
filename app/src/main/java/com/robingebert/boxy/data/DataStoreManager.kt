@@ -88,5 +88,8 @@ class DataStoreManager(context: Context) {
     val username by Preference("username", "")
     val password by Preference("password", "")
     val isFirstRun by Preference("is_first_run", true)
+
+    val localChanges by Preference("local_changes", false)
+    val pulledVersion by Preference("pulled_version", "")
     //endregion
 }

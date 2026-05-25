@@ -4,10 +4,24 @@ import android.content.Context
 import com.robingebert.boxy.data.network.StorageApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Instant
+
+
+@Serializable
+data class VersionInfo(
+    val id: String,
+    val user: String,
+    val date: Instant
+) {
+    fun getSince() = date.minus(Clock.System.now())
+}
 
 class SyncRepository(
     private val context: Context,
@@ -15,6 +29,35 @@ class SyncRepository(
 ) {
     private val filesDir = context.filesDir
     private val cacheDir = context.cacheDir
+
+    suspend fun getVersionsList(): Result<List<VersionInfo>> {
+        return try {
+            Result.success(api.getVersionsList().map { convertToVersionInfo(it) })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getLatestVersionTag(): Result<VersionInfo> {
+        return try {
+            Result.success(convertToVersionInfo(api.getLatestVersionTag()))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun pullVersion(version: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val zipData = api.downloadTaggedVersion(version)
+            clearLocalData()
+            unzipToFilesDir(zipData)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
 
     suspend fun pullLatestVersion(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -106,5 +149,14 @@ class SyncRepository(
             fis.copyTo(zos)
             zos.closeEntry()
         }
+    }
+
+    private fun convertToVersionInfo(versionString: String): VersionInfo {
+        val parts = versionString.split("_")
+        return VersionInfo(
+            id = versionString,
+            user = parts[0],
+            date = Instant.fromEpochSeconds(parts[1].toLong())
+        )
     }
 }
