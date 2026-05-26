@@ -37,7 +37,7 @@ fun ServerConnectionDetailsDialog(
     LaunchedEffect(url) {
         connectionPossible = withContext(Dispatchers.IO) {
             try {
-                val url = URL(url)
+                val url = URL("$url/id")
                 val connection = url.openConnection() as HttpURLConnection
 
                 connection.requestMethod = "GET"
@@ -45,7 +45,7 @@ fun ServerConnectionDetailsDialog(
                 connection.readTimeout = 3000
 
                 connection.responseCode == 418
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 false
             }
         }

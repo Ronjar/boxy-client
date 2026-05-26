@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.sync.composables
+package com.robingebert.boxy.ui.sync.modal.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

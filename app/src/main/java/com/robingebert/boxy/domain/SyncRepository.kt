@@ -31,19 +31,25 @@ class SyncRepository(
     private val cacheDir = context.cacheDir
 
     suspend fun getVersionsList(): Result<List<VersionInfo>> {
-        return try {
-            Result.success(api.getVersionsList().map { convertToVersionInfo(it) })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return api.getVersionsList().fold(
+            onSuccess = { versionStrings ->
+                Result.success(versionStrings.map { convertToVersionInfo(it) })
+            },
+            onFailure = { e ->
+                Result.failure(e)
+            }
+        )
     }
 
     suspend fun getLatestVersionTag(): Result<VersionInfo> {
-        return try {
-            Result.success(convertToVersionInfo(api.getLatestVersionTag()))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return api.getLatestVersionTag().fold(
+            onSuccess = { versionString ->
+                Result.success(convertToVersionInfo(versionString))
+            },
+            onFailure = { e ->
+                Result.failure(e)
+            }
+        )
     }
 
     suspend fun pullVersion(version: String): Result<Unit> = withContext(Dispatchers.IO) {
@@ -60,16 +66,16 @@ class SyncRepository(
     }
 
     suspend fun pullLatestVersion(): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val zipData = api.downloadLatestVersion()
-            clearLocalData()
-            unzipToFilesDir(zipData)
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
-        }
+        api.downloadLatestVersion().fold(
+            onSuccess = { zipData ->
+                clearLocalData()
+                unzipToFilesDir(zipData)
+                Result.success(Unit)
+            },
+            onFailure = { e ->
+                Result.failure(e)
+            }
+        )
     }
 
     suspend fun pushCurrentState(): Result<Unit> = withContext(Dispatchers.IO) {

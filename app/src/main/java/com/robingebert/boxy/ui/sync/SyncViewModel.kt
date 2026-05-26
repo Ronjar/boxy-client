@@ -65,9 +65,14 @@ class SyncViewModel(
 
     fun getLatestVersionTag() {
         viewModelScope.launch {
-            syncRepository.getLatestVersionTag().onSuccess {
-                _latestVersion.value = DataFetcher.Data(it)
-            }
+            syncRepository.getLatestVersionTag().fold(
+                onSuccess = {
+                    _latestVersion.value = DataFetcher.Data(it)
+                },
+                onFailure = {
+                    _latestVersion.value = DataFetcher.Error(it)
+                }
+            )
         }
     }
 

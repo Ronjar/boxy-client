@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.sync.composables
+package com.robingebert.boxy.ui.sync.modal.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,7 +43,7 @@ fun ConnectionCard(
         connectionPossible = null
         connectionPossible = withContext(Dispatchers.IO) {
             try {
-                val url = URL(url)
+                val url = URL("$url/id")
                 val connection = url.openConnection() as HttpURLConnection
 
                 connection.requestMethod = "GET"

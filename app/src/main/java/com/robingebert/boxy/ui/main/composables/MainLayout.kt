@@ -23,7 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import com.robingebert.boxy.ui.navigation.Screen
-import com.robingebert.boxy.ui.sync.composables.SyncBottomSheet
+import com.robingebert.boxy.ui.sync.modal.SyncBottomSheet
 
 @Composable
 fun MainLayout(
