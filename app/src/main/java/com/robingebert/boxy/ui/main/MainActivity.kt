@@ -7,12 +7,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.robingebert.boxy.ui.main.composables.MainLayout
 import com.robingebert.boxy.ui.main.composables.ServerConnectionDetailsDialog
 import com.robingebert.boxy.ui.navigation.AppNavigation
+import com.robingebert.boxy.ui.navigation.Destination
 import com.robingebert.boxy.ui.theme.BoxyTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.ext.android.inject
@@ -29,9 +33,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
+            var destination by remember { mutableStateOf(Destination()) }
             val loginData by deepLinkData.collectAsState()
 
             val localChanges by viewModel.localChanges.collectAsStateWithLifecycle()
+            val newRemoteVersion by viewModel.remoteChanges.collectAsStateWithLifecycle()
 
             BoxyTheme {
                 if (loginData != null) {
@@ -52,9 +58,13 @@ class MainActivity : ComponentActivity() {
                 MainLayout(
                     modifier = Modifier.fillMaxSize(),
                     navController = navController,
-                    hasLocalChanges = localChanges
+                    destination = destination,
+                    hasLocalChanges = localChanges,
+                    hasRemoteChanges = newRemoteVersion
                 ) {
-                    AppNavigation(navController = navController)
+                    AppNavigation(navController = navController) {
+                        destination = it
+                    }
                 }
             }
         }

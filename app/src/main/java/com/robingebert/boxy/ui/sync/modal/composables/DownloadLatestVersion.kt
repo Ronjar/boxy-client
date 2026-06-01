@@ -1,6 +1,7 @@
 package com.robingebert.boxy.ui.sync.modal.composables
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,7 +19,7 @@ import androidx.compose.ui.unit.dp
 fun DownloadLatestVersion(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Card(modifier = modifier.clip(RoundedCornerShape(12.dp)), onClick = onClick) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(Icons.Default.CloudDownload, contentDescription = null)

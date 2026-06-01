@@ -95,3 +95,14 @@ suspend inline fun <reified T, reified B> HttpClient.safePost(
         block()
     }
 }
+
+suspend inline fun <reified T> HttpClient.safeDelete(
+    urlString: String,
+    block: HttpRequestBuilder.() -> Unit = {}
+): Result<T> {
+    return safeRequest {
+        url(urlString)
+        method = HttpMethod.Delete
+        block()
+    }
+}

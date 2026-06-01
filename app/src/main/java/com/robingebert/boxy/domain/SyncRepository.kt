@@ -1,6 +1,8 @@
 package com.robingebert.boxy.domain
 
 import android.content.Context
+import com.robingebert.boxy.data.network.HttpException
+import com.robingebert.boxy.data.network.NetworkException
 import com.robingebert.boxy.data.network.StorageApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -10,7 +12,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.Instant
 
 
@@ -24,8 +25,10 @@ data class VersionInfo(
 }
 
 class SyncRepository(
-    private val context: Context,
-    private val api: StorageApi
+    context: Context,
+    private val api: StorageApi,
+    private val assetRepository: AssetRepository,
+    private val locationRepository: LocationRepository
 ) {
     private val filesDir = context.filesDir
     private val cacheDir = context.cacheDir
@@ -36,7 +39,19 @@ class SyncRepository(
                 Result.success(versionStrings.map { convertToVersionInfo(it) })
             },
             onFailure = { e ->
-                Result.failure(e)
+                return when (e) {
+                    is HttpException if e.message.equals("404") -> {
+                        Result.failure(NoBackupsYetException())
+                    }
+
+                    is NetworkException -> {
+                        Result.failure(NetworkException())
+                    }
+
+                    else -> {
+                        Result.failure(RestoreFailedException())
+                    }
+                }
             }
         )
     }
@@ -47,52 +62,129 @@ class SyncRepository(
                 Result.success(convertToVersionInfo(versionString))
             },
             onFailure = { e ->
-                Result.failure(e)
+                return when (e) {
+                    is HttpException if e.message.equals("404") -> {
+                        Result.failure(NoBackupsYetException())
+                    }
+
+                    is NetworkException -> {
+                        Result.failure(NetworkException())
+                    }
+
+                    else -> {
+                        Result.failure(RestoreFailedException())
+                    }
+                }
             }
         )
     }
 
-    suspend fun pullVersion(version: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val zipData = api.downloadTaggedVersion(version)
-            clearLocalData()
-            unzipToFilesDir(zipData)
+    suspend fun pullVersion(version: String): Result<String> = withContext(Dispatchers.IO) {
+        api.downloadTaggedVersion(version).fold(
+            onSuccess = { zipData ->
+                replaceVersion(zipData)
+                Result.success(version)
+            },
+            onFailure = { e ->
+                when (e) {
+                    is HttpException if e.message.equals("404") -> {
+                        Result.failure(VersionNotFoundException())
+                    }
 
-            Result.success(Unit)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
-        }
+                    is NetworkException -> {
+                        Result.failure(NetworkException())
+                    }
+
+                    else -> {
+                        Result.failure(RestoreFailedException())
+                    }
+                }
+            }
+        )
     }
 
     suspend fun pullLatestVersion(): Result<Unit> = withContext(Dispatchers.IO) {
         api.downloadLatestVersion().fold(
             onSuccess = { zipData ->
-                clearLocalData()
-                unzipToFilesDir(zipData)
+                replaceVersion(zipData)
                 Result.success(Unit)
             },
             onFailure = { e ->
-                Result.failure(e)
+                when (e) {
+                    is HttpException if e.message.equals("404") -> {
+                        Result.failure(VersionNotFoundException())
+                    }
+
+                    is NetworkException -> {
+                        Result.failure(NetworkException())
+                    }
+
+                    else -> {
+                        Result.failure(RestoreFailedException())
+                    }
+                }
             }
         )
     }
 
-    suspend fun pushCurrentState(): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun pushCurrentState(): Result<String> = withContext(Dispatchers.IO) {
         try {
             val tempZipFile = File(cacheDir, "upload_temp.zip")
 
             zipLocalData(tempZipFile)
 
-            api.uploadNewVersion(tempZipFile)
+            api.uploadNewVersion(tempZipFile).fold(
+                onSuccess = { versionTag ->
+                    Result.success(versionTag)
+                },
+                onFailure = { e ->
+                    when (e) {
+                        is NetworkException -> {
+                            tempZipFile.delete()
+                            Result.failure(NetworkException())
+                        }
 
-            tempZipFile.delete()
+                        else -> {
+                            tempZipFile.delete()
+                            Result.failure(BackupFailedException())
+                        }
+                    }
+                }
+            )
 
-            Result.success(Unit)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
+        } catch (_: Exception) {
+            Result.failure(BackupFailedException())
         }
+    }
+
+    suspend fun deleteVersion(version: VersionInfo): Result<Unit> {
+        return api.deleteVersion(version.id).fold(
+            onSuccess = {
+                Result.success(Unit)
+            },
+            onFailure = { e ->
+                when (e) {
+                    is HttpException if e.message.equals("404") -> {
+                        Result.failure(VersionNotFoundException())
+                    }
+
+                    is NetworkException -> {
+                        Result.failure(NetworkException())
+                    }
+
+                    else -> {
+                        Result.failure(e)
+                    }
+                }
+            }
+        )
+    }
+
+    private fun replaceVersion(zipData: ByteArray) {
+        clearLocalData()
+        unzipToFilesDir(zipData)
+        assetRepository.refresh()
+        locationRepository.refresh()
     }
 
     private fun clearLocalData() {
@@ -113,7 +205,7 @@ class SyncRepository(
                     val outFile = File(filesDir, entry.name)
 
                     if (!outFile.canonicalPath.startsWith(filesDir.canonicalPath)) {
-                        throw SecurityException("Ungültiger ZIP-Pfad: ${entry.name}")
+                        throw SecurityException("Invalid Zip-Path: ${entry.name}")
                     }
 
                     if (entry.isDirectory) {

@@ -23,6 +23,10 @@ class AssetRepository(context: Context) {
     val assets: StateFlow<List<Asset>> = _assets.asStateFlow()
 
     init {
+        refresh()
+    }
+
+    fun refresh(){
         if (file.exists()) {
             try {
                 val data = file.readText()

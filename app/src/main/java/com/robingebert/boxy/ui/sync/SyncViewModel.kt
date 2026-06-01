@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robingebert.boxy.data.DataStoreManager
 import com.robingebert.boxy.data.network.DataFetcher
+import com.robingebert.boxy.ui.common.SnackbarController
+import com.robingebert.boxy.ui.common.SnackbarEvent
 import com.robingebert.boxy.domain.SyncRepository
 import com.robingebert.boxy.domain.VersionInfo
+import com.robingebert.boxy.ui.common.composables.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onSubscription
@@ -14,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class SyncViewModel(
     private val dataStoreManager: DataStoreManager,
-    private val syncRepository: SyncRepository
+    private val syncRepository: SyncRepository,
+    private val snackbarController: SnackbarController
 ) : ViewModel() {
 
     val url = dataStoreManager.url.flow
@@ -58,7 +62,7 @@ class SyncViewModel(
     fun getVersionsList() {
         viewModelScope.launch {
             syncRepository.getVersionsList().onSuccess {
-                _versions.value = DataFetcher.Data(it)
+                _versions.value = DataFetcher.Data(it.reversed())
             }
         }
     }
@@ -79,19 +83,93 @@ class SyncViewModel(
 
     fun pullLatestVersion() {
         viewModelScope.launch {
-            syncRepository.pullLatestVersion()
+            syncRepository.pullLatestVersion().fold(
+                onSuccess = {
+                    dataStoreManager.localChanges.set(false)
+                    dataStoreManager.pulledVersion.set(_latestVersion.value.dataOrNull()?.id ?: "")
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarMessage(
+                            message = Event.RESTORE_SUCCESS
+                        )
+                    )
+                },
+                onFailure = {
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarException(
+                            throwable = it
+                        )
+                    )
+                }
+            )
         }
     }
 
     fun pullVersion(version: String) {
         viewModelScope.launch {
-            syncRepository.pullVersion(version)
+            syncRepository.pullVersion(version).fold(
+                onSuccess = {
+                    dataStoreManager.localChanges.set(false)
+                    dataStoreManager.pulledVersion.set(it)
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarMessage(
+                            message = Event.RESTORE_SUCCESS
+                        )
+                    )
+                },
+                onFailure = {
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarException(
+                            throwable = it
+                        )
+                    )
+                }
+            )
         }
     }
 
     fun pushNewVersion() {
         viewModelScope.launch {
-            syncRepository.pushCurrentState()
+            syncRepository.pushCurrentState().fold(
+                onSuccess = {
+                    dataStoreManager.localChanges.set(false)
+                    dataStoreManager.pulledVersion.set(it)
+                    getVersionsList()
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarMessage(
+                            message = Event.BACKUP_SUCCESS
+                        )
+                    )
+                },
+                onFailure = {
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarException(
+                            throwable = it
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    fun deleteVersion(version: VersionInfo){
+        viewModelScope.launch {
+            syncRepository.deleteVersion(version).fold(
+                onSuccess = {
+                    getVersionsList()
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarMessage(
+                            message = Event.DELETE_SUCCESS
+                        )
+                    )
+                },
+                onFailure = {
+                    snackbarController.sendEvent(
+                        SnackbarEvent.SnackbarException(
+                            throwable = it
+                        )
+                    )
+                }
+            )
         }
     }
 }

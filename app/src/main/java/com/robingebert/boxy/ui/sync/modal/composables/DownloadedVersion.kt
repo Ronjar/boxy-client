@@ -1,9 +1,9 @@
 package com.robingebert.boxy.ui.sync.modal.composables
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,8 +21,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.VersionInfo
-import com.robingebert.boxy.ui.common.composables.TimeUnitAgoText
 import com.robingebert.boxy.ui.common.composables.shimmerLoading
+import com.robingebert.boxy.ui.common.composables.timeUnitAgo
 
 @Composable
 fun DownloadedVersion(
@@ -32,7 +32,9 @@ fun DownloadedVersion(
     onShowVersions: () -> Unit
 ) {
     Card(
-        modifier = modifier
+        modifier = modifier.clickable{
+            onShowVersions()
+        }
     ) {
         Row(
             modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
@@ -47,8 +49,7 @@ fun DownloadedVersion(
                         false -> "Newest version"
                     }
                     Text(
-                        text = text,
-                        style = MaterialTheme.typography.labelMedium
+                        text = text
                     )
                 } else {
                     Text(
@@ -59,9 +60,9 @@ fun DownloadedVersion(
                 }
                 Spacer(Modifier.height(8.dp))
                 if (latestVersion is DataFetcher.Data) {
-                    TimeUnitAgoText(
-                        textStyle = MaterialTheme.typography.labelSmall,
-                        ago = latestVersion.data.getSince()
+                    Text(
+                        style = MaterialTheme.typography.labelSmall,
+                        text = timeUnitAgo(latestVersion.data.getSince())
                     )
                     Text(
                         modifier = Modifier.alpha(0.8f),

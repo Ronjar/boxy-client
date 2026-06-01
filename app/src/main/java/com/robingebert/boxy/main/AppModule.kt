@@ -6,6 +6,7 @@ import com.robingebert.boxy.data.network.BoxyKtorClient
 import com.robingebert.boxy.data.network.StorageApi
 import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
+import com.robingebert.boxy.ui.common.SnackbarController
 import com.robingebert.boxy.domain.SyncRepository
 import com.robingebert.boxy.ui.main.MainViewModel
 import com.robingebert.boxy.ui.sync.SyncViewModel
@@ -39,9 +40,10 @@ val commonModule = module {
         ).client
     }
     single { StorageApi(get()) }
+    single { SnackbarController() }
 
     // Repositories
     single { AssetRepository(get()) }
     single { LocationRepository(get()) }
-    single { SyncRepository(get(), get()) }
+    single { SyncRepository(get(), get(), get(), get()) }
 }

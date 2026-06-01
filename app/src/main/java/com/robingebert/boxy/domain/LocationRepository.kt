@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.collections.indexOfFirst
 
-class LocationRepository(private val context: Context) {
+class LocationRepository(context: Context) {
     private val file = File(context.filesDir, "locations.json")
     private val imageDir = File(context.filesDir, "images")
     private val mutex = Mutex()
@@ -26,6 +26,10 @@ class LocationRepository(private val context: Context) {
     val locations: StateFlow<List<Location>> = _locations.asStateFlow()
 
     init {
+        refresh()
+    }
+
+    fun refresh(){
         if (!imageDir.exists()) {
             imageDir.mkdirs()
         }
