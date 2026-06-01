@@ -4,20 +4,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ViewColumn
-import androidx.compose.material.icons.filled.ViewHeadline
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
@@ -32,13 +36,12 @@ import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.domain.models.LocationNode
 import com.robingebert.boxy.ui.common.EditOptionsDialogState
-import com.robingebert.boxy.ui.overview.UpNavigationTarget
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LocationGrid(
     modifier: Modifier = Modifier,
     breadcrumbs: List<Location>,
-    upNavigationTarget: UpNavigationTarget?,
     locations: DataFetcher<List<LocationNode>>,
     onNavigateUp: () -> Unit,
     onNavigateDown: (Location) -> Unit,
@@ -48,7 +51,6 @@ fun LocationGrid(
 ) {
 
     var compactLocationCards by rememberSaveable { mutableStateOf(true) }
-    val breadcrumbText = breadcrumbs.joinToString(separator = "") { "${it.name} / " }
 
     var locationDialogState by remember {
         mutableStateOf<EditOptionsDialogState<Location>>(
@@ -69,13 +71,34 @@ fun LocationGrid(
                 modifier = Modifier
                     .weight(1f)
             ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .alpha(0.8f),
-                    text = "/ $breadcrumbText",
-                    style = MaterialTheme.typography.labelMedium
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Breadcrumbs(
+                        modifier = Modifier.weight(1f),
+                        breadcrumbs = listOf("Home") + breadcrumbs.map { it.name }
+                    ) { index ->
+                        for (i in breadcrumbs.size - index downTo 1) {
+                            onNavigateUp()
+                        }
+                    }
+                    val size = ButtonDefaults.ExtraSmallContainerHeight
+                    Button(
+                        modifier = Modifier.heightIn(size),
+                        contentPadding = ButtonDefaults.contentPaddingFor(size, hasStartIcon = true),
+                        onClick = {
+                            locationDialogState = EditOptionsDialogState.Edit(onAddLocation())
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add location",
+                            modifier = Modifier.size(ButtonDefaults.iconSizeFor(size)),
+                        )
+                        Text("Add", style = ButtonDefaults.textStyleFor(size))
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyVerticalGrid(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -86,28 +109,6 @@ fun LocationGrid(
                         is DataFetcher.Fetching -> item { Text("Loading...") }
                         is DataFetcher.Error -> item { Text("Error") }
                         is DataFetcher.Data -> {
-                            upNavigationTarget?.let {
-                                if (it is UpNavigationTarget.Folder) {
-                                    item {
-                                        LocationCard(
-                                            modifier = Modifier.alpha(0.8f),
-                                            location = it.location,
-                                            compact = compactLocationCards,
-                                        ) {
-                                            onNavigateUp()
-                                        }
-                                    }
-                                } else {
-                                    item {
-                                        HomeCard(
-                                            modifier = Modifier.alpha(0.6f),
-                                            compact = compactLocationCards,
-                                        ) {
-                                            onNavigateUp()
-                                        }
-                                    }
-                                }
-                            }
                             items(locations.data) { location ->
                                 LocationCard(
                                     modifier = Modifier.alpha(1f),
@@ -120,30 +121,10 @@ fun LocationGrid(
                                     onNavigateDown(location.location)
                                 }
                             }
-                            item {
-                                AddLocationCard(
-                                    modifier = Modifier.alpha(0.8f)
-                                ) {
-                                    locationDialogState = EditOptionsDialogState.Edit(onAddLocation())
-                                }
-                            }
                         }
                     }
                 }
-            }/*
-            Spacer(modifier = Modifier.width(8.dp))
-            OutlinedIconButton(
-                onClick = {
-                    compactLocationCards = !compactLocationCards
-                }
-            ) {
-                val icon = if (compactLocationCards) {
-                    Icons.Default.ViewHeadline
-                } else {
-                    Icons.Default.ViewColumn
-                }
-                Icon(imageVector = icon, contentDescription = "Toggle location card size")
-            }*/
+            }
         }
 
     }

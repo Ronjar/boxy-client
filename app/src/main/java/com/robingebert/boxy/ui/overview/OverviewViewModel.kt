@@ -57,8 +57,10 @@ class OverviewViewModel(
         val allLocations = locationRepository.locations.value
         val currentPath = mutableListOf<Location>()
         var currentId: Long? = locationId
+        val visitedIds = mutableSetOf<Long>()
 
-        while (currentId != null) {
+        while (currentId != null && currentId !in visitedIds) {
+            visitedIds.add(currentId)
             val location = allLocations.find { it.id == currentId }
             if (location != null) {
                 currentPath.add(0, location)

@@ -96,15 +96,18 @@ class LocationRepository(context: Context) {
 
     private fun buildTree(
         parentId: Long?,
-        groupedLocations: Map<Long?, List<Location>>
+        groupedLocations: Map<Long?, List<Location>>,
+        visitedIds: Set<Long> = emptySet()
     ): List<LocationNode> {
         val children = groupedLocations[parentId] ?: emptyList()
 
-        return children.map { location ->
-            LocationNode(
-                location = location,
-                children = buildTree(location.id, groupedLocations)
-            )
-        }
+        return children
+            .filter { it.id !in visitedIds }
+            .map { location ->
+                LocationNode(
+                    location = location,
+                    children = buildTree(location.id, groupedLocations, visitedIds + location.id)
+                )
+            }
     }
 }

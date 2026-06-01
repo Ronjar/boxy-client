@@ -21,7 +21,7 @@ data class VersionInfo(
     val user: String,
     val date: Instant
 ) {
-    fun getSince() = date.minus(Clock.System.now())
+    fun getSince() = Clock.System.now().minus(date)
 }
 
 class SyncRepository(

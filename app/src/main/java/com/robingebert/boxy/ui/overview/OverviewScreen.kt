@@ -1,15 +1,11 @@
 package com.robingebert.boxy.ui.overview
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,20 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robingebert.boxy.data.network.DataFetcher
-import com.robingebert.boxy.domain.models.Asset
-import com.robingebert.boxy.domain.models.Location
-import com.robingebert.boxy.ui.common.EditOptionsDialogState
-import com.robingebert.boxy.ui.overview.composables.FabMenu
-import com.robingebert.boxy.ui.overview.composables.assets.AssetCard
 import com.robingebert.boxy.ui.overview.composables.assets.AssetGrid
-import com.robingebert.boxy.ui.overview.composables.assets.AssetModal
-import com.robingebert.boxy.ui.overview.composables.assets.AssetOption
-import com.robingebert.boxy.ui.overview.composables.assets.AssetOptionsBottomSheet
 import com.robingebert.boxy.ui.overview.composables.location.LocationGrid
-import com.robingebert.boxy.ui.overview.composables.location.LocationModal
-import com.robingebert.boxy.ui.overview.composables.location.LocationOption
-import com.robingebert.boxy.ui.overview.composables.location.LocationOptionsBottomSheet
 import com.robingebert.boxy.ui.overview.composables.search.SearchModal
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -51,7 +35,6 @@ fun OverviewScreen(
     val locations by viewModel.currentLocations.collectAsStateWithLifecycle()
     val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
     val breadcrumbs by viewModel.breadcrumbs.collectAsStateWithLifecycle()
-    val upNavigationTarget by viewModel.upNavigationTarget.collectAsStateWithLifecycle()
 
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     var showSearchDialog by remember { mutableStateOf(false) }
@@ -83,7 +66,6 @@ fun OverviewScreen(
                     .padding(8.dp)
                     .fillMaxWidth(),
                 breadcrumbs = breadcrumbs,
-                upNavigationTarget = upNavigationTarget,
                 locations = locations,
                 onNavigateUp = { viewModel.navigateUp() },
                 onNavigateDown = { viewModel.navigateDown(it) },
@@ -91,13 +73,9 @@ fun OverviewScreen(
                 onSaveLocation = { viewModel.saveLocation(it) },
                 onDeleteLocation = { viewModel.removeLocation(it) }
             )
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Assets"
-            )
             AssetGrid(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(16.dp)
                     .fillMaxWidth(),
                 assets = assets,
                 onNewAsset = { viewModel.newAsset() },
