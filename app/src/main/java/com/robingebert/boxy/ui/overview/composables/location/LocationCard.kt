@@ -53,9 +53,8 @@ fun LocationCard(
                 Text(
                     text = location.name,
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.labelSmall,
-                    minLines = 2,
-                    maxLines = 2,
+                    minLines = 1,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }

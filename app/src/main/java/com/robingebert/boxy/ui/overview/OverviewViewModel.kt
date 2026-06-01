@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
 
+data class SearchResult(
+    val assets: List<Asset>,
+    val locations: List<Location>
+)
 
 sealed interface UpNavigationTarget {
     data object Home : UpNavigationTarget
@@ -35,14 +39,38 @@ class OverviewViewModel(
     private val assetRepository: AssetRepository
 ) : ViewModel() {
 
+    fun changed() {
+        dataStoreManager.localChanges.set(true)
+    }
+
+    //region Navigation
     private val _currentParent = MutableStateFlow<Location?>(null)
-    val currentParent: StateFlow<Location?> = _currentParent.asStateFlow()
-    val currentGrandParent: StateFlow<Location?> = _currentParent
-
-    val hasParentLocation: Boolean get() = _currentParent.value != null
-
     private val _breadcrumbs = MutableStateFlow<List<Location>>(emptyList())
     val breadcrumbs: StateFlow<List<Location>> = _breadcrumbs.asStateFlow()
+
+    fun navigateTo(locationId: Long?) {
+        if (locationId == null) {
+            _breadcrumbs.value = emptyList()
+            _currentParent.value = null
+            return
+        }
+        val allLocations = locationRepository.locations.value
+        val currentPath = mutableListOf<Location>()
+        var currentId: Long? = locationId
+
+        while (currentId != null) {
+            val location = allLocations.find { it.id == currentId }
+            if (location != null) {
+                currentPath.add(0, location)
+                currentId = location.parentId
+            } else {
+                break
+            }
+        }
+
+        _breadcrumbs.value = currentPath
+        _currentParent.value = currentPath.lastOrNull()
+    }
 
     fun navigateDown(location: Location) {
         val currentPath = _breadcrumbs.value.toMutableList()
@@ -76,11 +104,7 @@ class OverviewViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
-
-
-    fun changed(){
-        dataStoreManager.localChanges.set(true)
-    }
+    //endregion
 
     //region Assets
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -107,14 +131,12 @@ class OverviewViewModel(
             initialValue = DataFetcher.Fetching
         )
 
-    fun newAsset(): Asset? {
-        return _currentParent.value?.let {
-            Asset(
-                id = assetRepository.size().toLong(),
-                name = "",
-                parentId = it.id
-            )
-        }
+    fun newAsset(): Asset {
+        return Asset(
+            id = assetRepository.size().toLong(),
+            name = "",
+            parentId = _currentParent.value?.id
+        )
     }
 
     fun saveAsset(asset: Asset) {
@@ -169,6 +191,28 @@ class OverviewViewModel(
             locationRepository.remove(location.id)
             changed()
         }
+    }
+    //endregion
+
+    //region Search
+    private val _searchResults = MutableStateFlow<SearchResult?>(null)
+    val searchResults: StateFlow<SearchResult?> = _searchResults.asStateFlow()
+
+    fun search(query: String) {
+        viewModelScope.launch {
+            val assets =
+                assetRepository.getAll().find { it.name.contains(query, ignoreCase = true) }
+                    ?.let { listOf(it) } ?: emptyList()
+            val locations =
+                locationRepository.getAll().find { it.name.contains(query, ignoreCase = true) }
+                    ?.let { listOf(it) } ?: emptyList()
+
+            _searchResults.value = SearchResult(assets, locations)
+        }
+    }
+
+    fun clearSearch() {
+        _searchResults.value = null
     }
     //endregion
 }

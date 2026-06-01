@@ -10,7 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +31,7 @@ import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.ui.common.EditOptionsDialogState
 import com.robingebert.boxy.ui.overview.composables.FabMenu
 import com.robingebert.boxy.ui.overview.composables.assets.AssetCard
+import com.robingebert.boxy.ui.overview.composables.assets.AssetGrid
 import com.robingebert.boxy.ui.overview.composables.assets.AssetModal
 import com.robingebert.boxy.ui.overview.composables.assets.AssetOption
 import com.robingebert.boxy.ui.overview.composables.assets.AssetOptionsBottomSheet
@@ -34,6 +39,7 @@ import com.robingebert.boxy.ui.overview.composables.location.LocationGrid
 import com.robingebert.boxy.ui.overview.composables.location.LocationModal
 import com.robingebert.boxy.ui.overview.composables.location.LocationOption
 import com.robingebert.boxy.ui.overview.composables.location.LocationOptionsBottomSheet
+import com.robingebert.boxy.ui.overview.composables.search.SearchModal
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,39 +49,31 @@ fun OverviewScreen(
 ) {
 
     val locations by viewModel.currentLocations.collectAsStateWithLifecycle()
+    val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
     val breadcrumbs by viewModel.breadcrumbs.collectAsStateWithLifecycle()
     val upNavigationTarget by viewModel.upNavigationTarget.collectAsStateWithLifecycle()
-    val assets by viewModel.currentAssets.collectAsStateWithLifecycle()
 
-    var assetDialogState by remember {
-        mutableStateOf<EditOptionsDialogState<Asset>>(
-            EditOptionsDialogState.None
-        )
-    }
-    var locationDialogState by remember {
-        mutableStateOf<EditOptionsDialogState<Location>>(
-            EditOptionsDialogState.None
-        )
-    }
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    var showSearchDialog by remember { mutableStateOf(false) }
 
-    BackHandler(breadcrumbs.isNotEmpty()) { viewModel.navigateUp() }
+    BackHandler(breadcrumbs.isNotEmpty() && !showSearchDialog) { viewModel.navigateUp() }
 
     Box(
         modifier = Modifier
             .fillMaxSize(),
         contentAlignment = Alignment.BottomEnd
     ) {
-        FabMenu(
-            onNewAsset = {
-                viewModel.newAsset()?.let {
-                    assetDialogState = EditOptionsDialogState.Edit(it)
-                }
-            },
-            onNewLocation = {
-                locationDialogState = EditOptionsDialogState.Edit(viewModel.newLocation())
-            },
-            showAsset = breadcrumbs.isNotEmpty()
-        )
+        FloatingActionButton(
+            modifier = Modifier.padding(16.dp),
+            onClick = {
+                showSearchDialog = true
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search"
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -89,98 +87,39 @@ fun OverviewScreen(
                 locations = locations,
                 onNavigateUp = { viewModel.navigateUp() },
                 onNavigateDown = { viewModel.navigateDown(it) },
-                onEditLocation = { locationDialogState = EditOptionsDialogState.Options(it) }
+                onAddLocation = { viewModel.newLocation() },
+                onSaveLocation = { viewModel.saveLocation(it) },
+                onDeleteLocation = { viewModel.removeLocation(it) }
             )
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = "Assets"
             )
-            LazyVerticalGrid(
+            AssetGrid(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                columns = GridCells.Fixed(1),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                when (val state = assets) {
-                    is DataFetcher.Fetching -> item { Text("Loading...") }
-                    is DataFetcher.Error -> item { Text("Error") }
-                    is DataFetcher.Data -> {
-                        items(state.data) { asset ->
-                            AssetCard(
-                                asset = asset,
-                            ) {
-                                assetDialogState = EditOptionsDialogState.Options(asset)
-                            }
-                        }
-                    }
-                }
-            }
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                assets = assets,
+                onNewAsset = { viewModel.newAsset() },
+                onSaveAsset = { viewModel.saveAsset(it) },
+                onDeleteAsset = { viewModel.removeAsset(it) }
+            )
         }
     }
 
-    when (val state = assetDialogState) {
-        is EditOptionsDialogState.Edit -> {
-            AssetModal(
-                asset = state.data,
-                onDismiss = { assetDialogState = EditOptionsDialogState.None },
-                onSave = { updatedAsset ->
-                    viewModel.saveAsset(updatedAsset)
-                    assetDialogState = EditOptionsDialogState.None
-                }
-            )
+    if (showSearchDialog) {
+        SearchModal(
+            onDismiss = {
+                showSearchDialog = false
+                viewModel.clearSearch()
+            },
+            searchResults = searchResults,
+            onSearch = { viewModel.search(it) },
+            onClearSearch = { viewModel.clearSearch() },
+        ) {
+            showSearchDialog = false
+            viewModel.clearSearch()
+            viewModel.navigateTo(it)
         }
-
-        is EditOptionsDialogState.Options -> {
-            AssetOptionsBottomSheet(
-                onDismiss = { assetDialogState = EditOptionsDialogState.None }
-            ) {
-                when (it) {
-                    AssetOption.EDIT -> {
-                        assetDialogState = EditOptionsDialogState.Edit(state.data)
-                    }
-
-                    AssetOption.DELETE -> {
-                        viewModel.removeAsset(state.data)
-                        assetDialogState = EditOptionsDialogState.None
-                    }
-                }
-            }
-        }
-
-        else -> {}
-    }
-
-    when (val state = locationDialogState) {
-        is EditOptionsDialogState.Edit -> {
-            LocationModal(
-                location = state.data,
-                onDismiss = { locationDialogState = EditOptionsDialogState.None },
-                onSave = { updatedLocation ->
-                    viewModel.saveLocation(updatedLocation)
-                    locationDialogState = EditOptionsDialogState.None
-                }
-            )
-        }
-
-        is EditOptionsDialogState.Options -> {
-            LocationOptionsBottomSheet(
-                onDismiss = { locationDialogState = EditOptionsDialogState.None }
-            ) {
-                when (it) {
-                    LocationOption.EDIT -> {
-                        locationDialogState = EditOptionsDialogState.Edit(state.data)
-                    }
-
-                    LocationOption.DELETE -> {
-                        viewModel.removeLocation(state.data)
-                        locationDialogState = EditOptionsDialogState.None
-                    }
-                }
-            }
-        }
-
-        else -> {}
     }
 }
