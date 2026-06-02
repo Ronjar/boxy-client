@@ -10,7 +10,7 @@ import java.io.File
 class NetworkException(cause: Throwable) : Exception(cause)
 class HttpException(statusCode: Int) : Exception(statusCode.toString())
 
-class StorageApi(private val client: HttpClient) {
+class SyncApi(private val client: HttpClient) {
 
     suspend fun downloadLatestVersion(): Result<ByteArray> {
         return client.safeGet<ByteArray>("")
@@ -29,17 +29,23 @@ class StorageApi(private val client: HttpClient) {
     }
 
     suspend fun uploadNewVersion(zipFile: File): Result<String> {
-        return client.safePost<String, MultiPartFormDataContent>(urlString = "", bodyData = MultiPartFormDataContent(
-            formData {
-                append("file", zipFile.readBytes(), Headers.build {
-                    append(HttpHeaders.ContentType, "application/zip")
-                    append(HttpHeaders.ContentDisposition, "filename=\"${zipFile.name}\"")
-                })
-            }
-        ))
+        return client.safePost<String, MultiPartFormDataContent>(
+            urlString = "",
+            bodyData = MultiPartFormDataContent(
+                formData {
+                    append("file", zipFile.readBytes(), Headers.build {
+                        append(HttpHeaders.ContentType, "application/zip")
+                        append(HttpHeaders.ContentDisposition, "filename=\"${zipFile.name}\"")
+                    })
+                }
+            ))
     }
 
     suspend fun deleteVersion(versionTag: String): Result<Unit> {
-        return client.safeDelete<Unit>(versionTag)
+        return client.safeDelete<Unit>("") {
+            url {
+                parameters.append("version", versionTag)
+            }
+        }
     }
 }

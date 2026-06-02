@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robingebert.boxy.data.DataStoreManager
 import com.robingebert.boxy.data.network.DataFetcher
-import com.robingebert.boxy.data.network.StorageApi
+import com.robingebert.boxy.data.network.SyncApi
 import com.robingebert.boxy.ui.common.SnackbarController
 import com.robingebert.boxy.ui.common.SnackbarEvent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     val dataStoreManager: DataStoreManager,
-    val storageApi: StorageApi,
+    val syncApi: SyncApi,
     val snackbarController: SnackbarController
 ) :
     ViewModel() {
@@ -37,7 +37,7 @@ class MainViewModel(
     }
 
     suspend fun compareWithRemoteVersion(localVersion: String): DataFetcher<Boolean> {
-        return storageApi.getLatestVersionTag().fold(
+        return syncApi.getLatestVersionTag().fold(
             onSuccess = { latestVersion ->
                 DataFetcher.Data(latestVersion != localVersion)
             },

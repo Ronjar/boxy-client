@@ -3,7 +3,7 @@ package com.robingebert.boxy.main
 
 import com.robingebert.boxy.data.DataStoreManager
 import com.robingebert.boxy.data.network.BoxyKtorClient
-import com.robingebert.boxy.data.network.StorageApi
+import com.robingebert.boxy.data.network.SyncApi
 import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
 import com.robingebert.boxy.ui.common.SnackbarController
@@ -39,7 +39,7 @@ val commonModule = module {
             getPassword = { dataStore.password.flow.value }
         ).client
     }
-    single { StorageApi(get()) }
+    single { SyncApi(get()) }
     single { SnackbarController() }
 
     // Repositories

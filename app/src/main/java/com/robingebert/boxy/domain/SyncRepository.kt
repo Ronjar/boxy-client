@@ -3,7 +3,7 @@ package com.robingebert.boxy.domain
 import android.content.Context
 import com.robingebert.boxy.data.network.HttpException
 import com.robingebert.boxy.data.network.NetworkException
-import com.robingebert.boxy.data.network.StorageApi
+import com.robingebert.boxy.data.network.SyncApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -26,7 +26,7 @@ data class VersionInfo(
 
 class SyncRepository(
     context: Context,
-    private val api: StorageApi,
+    private val api: SyncApi,
     private val assetRepository: AssetRepository,
     private val locationRepository: LocationRepository
 ) {
