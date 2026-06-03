@@ -11,16 +11,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -29,12 +32,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.ui.common.SnackbarController
 import com.robingebert.boxy.ui.common.composables.rememberEventMessageResolver
+import com.robingebert.boxy.ui.main.MainViewModel
 import com.robingebert.boxy.ui.navigation.Destination
 import com.robingebert.boxy.ui.navigation.Screen
 import com.robingebert.boxy.ui.sync.modal.SyncBottomSheet
@@ -44,12 +51,15 @@ import org.koin.compose.koinInject
 fun MainLayout(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    hasLocalChanges: Boolean,
-    hasRemoteChanges: DataFetcher<Boolean>,
     destination: Destination,
     content: @Composable (() -> Unit)
 ) {
+    val viewModel: MainViewModel = koinInject()
     var showSyncBottomSheet by remember { mutableStateOf(false) }
+
+    val hasLocalChanges by viewModel.localChanges.collectAsStateWithLifecycle()
+    val hasRemoteChanges by viewModel.remoteChanges.collectAsStateWithLifecycle()
+    val updateDownloadProgress by viewModel.updateDownloadProgress.collectAsStateWithLifecycle()
 
     val syncRotation = if (hasRemoteChanges is DataFetcher.Fetching) {
         val transition = rememberInfiniteTransition(label = "syncRotation")
@@ -72,10 +82,15 @@ fun MainLayout(
 
     LaunchedEffect(snackbarController, snackbarHostState) {
         snackbarController.events.collect { event ->
-            snackbarHostState.showSnackbar(
-                message = eventToMessage(event),
-                duration = SnackbarDuration.Short
+            val message = eventToMessage(event)
+            val result = snackbarHostState.showSnackbar(
+                message = message.message,
+                duration = SnackbarDuration.Short,
+                actionLabel = message.actionLabel
             )
+            if (result == SnackbarResult.ActionPerformed) {
+                message.action?.invoke()
+            }
         }
     }
 
@@ -90,6 +105,17 @@ fun MainLayout(
                 title = { Text(destination.name) },
                 actions = {
                     if (destination.isMain) {
+                        if (updateDownloadProgress in 0f..<1f) {
+                            Box(contentAlignment = Alignment.Center){
+                                CircularProgressIndicator(progress = {updateDownloadProgress}, strokeWidth = 3.dp)
+                                IconButton(onClick = { viewModel.downloadButtonClicked() }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Download,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        }
                         IconButton(onClick = {
                             showSyncBottomSheet = true
                         }) {
@@ -108,15 +134,6 @@ fun MainLayout(
                                     modifier = Modifier.rotate(syncRotation)
                                 )
                             }
-                        }
-                        IconButton(onClick = {
-                            navController.navigate(Screen.Settings)
-
-                        }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Settings,
-                                contentDescription = null
-                            )
                         }
                     }
                 },

@@ -36,9 +36,6 @@ class MainActivity : ComponentActivity() {
             var destination by remember { mutableStateOf(Destination()) }
             val loginData by deepLinkData.collectAsState()
 
-            val localChanges by viewModel.localChanges.collectAsStateWithLifecycle()
-            val newRemoteVersion by viewModel.remoteChanges.collectAsStateWithLifecycle()
-
             BoxyTheme {
                 if (loginData != null) {
                     ServerConnectionDetailsDialog(
@@ -58,9 +55,7 @@ class MainActivity : ComponentActivity() {
                 MainLayout(
                     modifier = Modifier.fillMaxSize(),
                     navController = navController,
-                    destination = destination,
-                    hasLocalChanges = localChanges,
-                    hasRemoteChanges = newRemoteVersion
+                    destination = destination
                 ) {
                     AppNavigation(navController = navController) {
                         destination = it

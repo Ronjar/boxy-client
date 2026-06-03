@@ -1,8 +1,16 @@
 package com.robingebert.boxy.ui.common
 
-import com.robingebert.boxy.ui.common.composables.Event
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+
+
+sealed class Event{
+    object BackupSuccess : Event()
+    object RestoreSuccess : Event()
+    object DeleteSuccess : Event()
+    data class UpdateAvailable(val onClick: () -> Unit) : Event()
+    data class UpdateInstallable(var onClick: () -> Unit) : Event()
+}
 
 sealed class SnackbarEvent {
     data class SnackbarMessage(val message: Event) : SnackbarEvent()

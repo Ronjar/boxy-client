@@ -8,49 +8,43 @@ import com.robingebert.boxy.domain.NoBackupsYetException
 import com.robingebert.boxy.domain.RestoreFailedException
 import com.robingebert.boxy.ui.common.SnackbarEvent
 import com.robingebert.boxy.domain.VersionNotFoundException
+import com.robingebert.boxy.ui.common.Event
 
-typealias EventMessageResolver = (SnackbarEvent) -> String
+data class EventMessage(
+    val message: String,
+    val actionLabel: String? = null,
+    val action: (() -> Unit)? = null
+)
 
-
-enum class Event {
-    BACKUP_SUCCESS,
-    RESTORE_SUCCESS,
-    DELETE_SUCCESS
-}
+typealias EventMessageResolver = (SnackbarEvent) -> EventMessage
 
 @Composable
 fun rememberEventMessageResolver(): EventMessageResolver {
-    val strings = object {
-        val noBackupsYet = "No backups yet"
-        val versionNotFound = "Version not found"
-        val networkError = "Network error"
-        val backupFailed = "Backup failed"
-        val restoreFailed = "Restore failed"
-        val unknownError = "Unknown error"
-    }
     return rememberUpdatedState< EventMessageResolver> { e ->
         if (e is SnackbarEvent.SnackbarException) {
             when (e.throwable) {
-                is NoBackupsYetException -> strings.noBackupsYet
-                is VersionNotFoundException -> strings.versionNotFound
-                is NetworkException -> strings.networkError
-                is BackupFailedException -> strings.backupFailed
-                is RestoreFailedException -> strings.restoreFailed
-                else -> strings.unknownError
+                is NoBackupsYetException -> EventMessage("No backups yet", null)
+                is VersionNotFoundException -> EventMessage("Version not found", null)
+                is NetworkException -> EventMessage("Network error", null)
+                is BackupFailedException -> EventMessage("Backup failed", null)
+                is RestoreFailedException -> EventMessage("Restore failed", null)
+                else -> EventMessage("Unknown error", null)
             }
         }
         else if (e is SnackbarEvent.SnackbarMessage) {
-            if (e.message == Event.BACKUP_SUCCESS) {
-                "Backup successful"
-            } else if (e.message == Event.RESTORE_SUCCESS) {
-                "Restore successful"
-            } else if (e.message == Event.DELETE_SUCCESS) {
-                "Delete successful"
-            } else {
-                strings.unknownError
+            when(e.message) {
+                is Event.BackupSuccess -> EventMessage("Backup successful", null)
+                is Event.RestoreSuccess -> EventMessage("Restore successful", null)
+                is Event.DeleteSuccess -> EventMessage("Delete successful", null)
+                is Event.UpdateAvailable -> EventMessage("Update available", "Update") {
+                    e.message.onClick()
+                }
+                is Event.UpdateInstallable -> EventMessage("Update ready to install", "Install") {
+                    e.message.onClick()
+                }
             }
         } else {
-            strings.unknownError
+            EventMessage("Unknown error", null)
         }
     }.value
 }

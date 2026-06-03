@@ -69,7 +69,7 @@ class DataStoreManager(context: Context) {
             }
             .stateIn(
                 scope = scope,
-                started = SharingStarted.Companion.Eagerly,
+                started = SharingStarted.Eagerly,
                 initialValue = defaultValue
             )
 

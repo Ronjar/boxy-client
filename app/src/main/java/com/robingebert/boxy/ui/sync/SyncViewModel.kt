@@ -8,7 +8,7 @@ import com.robingebert.boxy.ui.common.SnackbarController
 import com.robingebert.boxy.ui.common.SnackbarEvent
 import com.robingebert.boxy.domain.SyncRepository
 import com.robingebert.boxy.domain.VersionInfo
-import com.robingebert.boxy.ui.common.composables.Event
+import com.robingebert.boxy.ui.common.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onSubscription
@@ -89,7 +89,7 @@ class SyncViewModel(
                     dataStoreManager.pulledVersion.set(_latestVersion.value.dataOrNull()?.id ?: "")
                     snackbarController.sendEvent(
                         SnackbarEvent.SnackbarMessage(
-                            message = Event.RESTORE_SUCCESS
+                            message = Event.RestoreSuccess
                         )
                     )
                 },
@@ -112,7 +112,7 @@ class SyncViewModel(
                     dataStoreManager.pulledVersion.set(it)
                     snackbarController.sendEvent(
                         SnackbarEvent.SnackbarMessage(
-                            message = Event.RESTORE_SUCCESS
+                            message = Event.RestoreSuccess
                         )
                     )
                 },
@@ -136,7 +136,7 @@ class SyncViewModel(
                     getVersionsList()
                     snackbarController.sendEvent(
                         SnackbarEvent.SnackbarMessage(
-                            message = Event.BACKUP_SUCCESS
+                            message = Event.BackupSuccess
                         )
                     )
                 },
@@ -158,7 +158,7 @@ class SyncViewModel(
                     getVersionsList()
                     snackbarController.sendEvent(
                         SnackbarEvent.SnackbarMessage(
-                            message = Event.DELETE_SUCCESS
+                            message = Event.DeleteSuccess
                         )
                     )
                 },
