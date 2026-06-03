@@ -27,6 +27,7 @@ class LocationRepository(context: Context) {
 
     init {
         refresh()
+        clearTempImages(context)
     }
 
     fun refresh(){
@@ -109,5 +110,12 @@ class LocationRepository(context: Context) {
                     children = buildTree(location.id, groupedLocations, visitedIds + location.id)
                 )
             }
+    }
+
+
+    fun clearTempImages(context: Context) {
+        context.cacheDir.listFiles { file ->
+            file.name.startsWith("temp_image_") && file.name.endsWith(".jpg")
+        }?.forEach { it.delete() }
     }
 }

@@ -203,10 +203,10 @@ class OverviewViewModel(
     fun search(query: String) {
         viewModelScope.launch {
             val assets =
-                assetRepository.getAll().find { it.name.contains(query, ignoreCase = true) }
+                assetRepository.getAll().find { it.name.contains(query.trim(), ignoreCase = true) }
                     ?.let { listOf(it) } ?: emptyList()
             val locations =
-                locationRepository.getAll().find { it.name.contains(query, ignoreCase = true) }
+                locationRepository.getAll().find { it.name.contains(query.trim(), ignoreCase = true) }
                     ?.let { listOf(it) } ?: emptyList()
 
             _searchResults.value = SearchResult(assets, locations)

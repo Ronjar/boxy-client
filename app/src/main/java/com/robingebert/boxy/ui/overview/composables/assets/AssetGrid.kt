@@ -3,17 +3,15 @@ package com.robingebert.boxy.ui.overview.composables.assets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +28,14 @@ import com.robingebert.boxy.ui.common.EditOptionsDialogState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AssetGrid(modifier: Modifier = Modifier, assets: DataFetcher<List<Asset>>, onNewAsset: () -> Asset, onSaveAsset: (Asset) -> Unit, onDeleteAsset: (Asset) -> Unit) {
+fun AssetGrid(
+    modifier: Modifier = Modifier,
+    title: String,
+    assets: DataFetcher<List<Asset>>,
+    onNewAsset: () -> Asset,
+    onSaveAsset: (Asset) -> Unit,
+    onDeleteAsset: (Asset) -> Unit
+) {
     var assetDialogState by remember {
         mutableStateOf<EditOptionsDialogState<Asset>>(
             EditOptionsDialogState.None
@@ -45,37 +50,34 @@ fun AssetGrid(modifier: Modifier = Modifier, assets: DataFetcher<List<Asset>>, o
         ) {
             Text(
                 modifier = Modifier.weight(1f),
-                text = "Dinge"
+                text = title
             )
 
             val size = ButtonDefaults.ExtraSmallContainerHeight
-            Button(
-                modifier = Modifier.heightIn(size),
-                contentPadding = ButtonDefaults.contentPaddingFor(size, hasStartIcon = true),
+            FilledIconButton(
                 onClick = {
                     assetDialogState = EditOptionsDialogState.Edit(onNewAsset())
-                },
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Ding hinzufügen",
-                    modifier = Modifier.size(ButtonDefaults.iconSizeFor(size)),
+                    modifier = Modifier.size(ButtonDefaults.iconSizeFor(size))
                 )
-                Text("Hinzufügen", style = ButtonDefaults.textStyleFor(size))
             }
         }
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            when (assets) {
-                is DataFetcher.Fetching -> item { Text("Lädt...") }
-                is DataFetcher.Error -> item { Text("Fehler") }
-                is DataFetcher.Data -> {
-                    items(assets.data) { asset ->
+        Spacer(Modifier.height(8.dp))
+        when (assets) {
+            is DataFetcher.Fetching -> Text("Lädt...")
+            is DataFetcher.Error -> Text("Fehler")
+            is DataFetcher.Data -> {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    assets.data.forEach { asset ->
                         AssetCard(
+                            modifier = Modifier.fillMaxWidth(),
                             asset = asset,
                         ) {
                             assetDialogState = EditOptionsDialogState.Options(asset)
@@ -83,6 +85,7 @@ fun AssetGrid(modifier: Modifier = Modifier, assets: DataFetcher<List<Asset>>, o
                     }
                 }
             }
+
         }
     }
 

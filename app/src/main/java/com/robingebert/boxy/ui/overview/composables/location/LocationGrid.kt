@@ -9,18 +9,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -77,48 +77,80 @@ fun LocationGrid(
                 ) {
                     Breadcrumbs(
                         modifier = Modifier.weight(1f),
-                        breadcrumbs = listOf("Startseite") + breadcrumbs.map { it.name }
+                        breadcrumbs = listOf("/") + breadcrumbs.map { it.name }
                     ) { index ->
                         for (i in breadcrumbs.size - index downTo 1) {
                             onNavigateUp()
                         }
                     }
                     val size = ButtonDefaults.ExtraSmallContainerHeight
-                    Button(
+                    FilledIconButton(
                         modifier = Modifier.heightIn(size),
-                        contentPadding = ButtonDefaults.contentPaddingFor(size, hasStartIcon = true),
                         onClick = {
                             locationDialogState = EditOptionsDialogState.Edit(onAddLocation())
-                        },
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Ort hinzufügen",
                             modifier = Modifier.size(ButtonDefaults.iconSizeFor(size)),
                         )
-                        Text("Hinzufügen", style = ButtonDefaults.textStyleFor(size))
+                    }
+                    OutlinedIconButton(
+                        modifier = Modifier.heightIn(size),
+                        onClick = {
+                            compactLocationCards = !compactLocationCards
+                        }
+                    ) {
+                        val icon = if (compactLocationCards) {
+                            Icons.Default.ViewHeadline
+                        } else {
+                            Icons.Default.ViewColumn
+                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = "Ansicht wechseln",
+                            modifier = Modifier.size(ButtonDefaults.iconSizeFor(size)),
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                LazyVerticalGrid(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    columns = GridCells.Fixed(2)
-                ) {
-                    when (locations) {
-                        is DataFetcher.Fetching -> item { Text("Lädt...") }
-                        is DataFetcher.Error -> item { Text("Fehler") }
-                        is DataFetcher.Data -> {
-                            items(locations.data) { location ->
-                                LocationCard(
-                                    modifier = Modifier.alpha(1f),
-                                    location = location.location,
-                                    compact = compactLocationCards,
-                                    onLongClick = {
-                                        locationDialogState = EditOptionsDialogState.Options(location.location)
-                                    }
+
+                when (locations) {
+                    is DataFetcher.Fetching -> Text("Lädt...")
+                    is DataFetcher.Error -> Text("Fehler")
+                    is DataFetcher.Data -> {
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val rows = locations.data.chunked(if (compactLocationCards)2 else 3)
+                            rows.forEach { rowItems ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    onNavigateDown(location.location)
+                                    rowItems.forEach { location ->
+                                        LocationCard(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .alpha(1f),
+                                            location = location.location,
+                                            compact = compactLocationCards,
+                                            onLongClick = {
+                                                locationDialogState =
+                                                    EditOptionsDialogState.Options(location.location)
+                                            }
+                                        ) {
+                                            onNavigateDown(location.location)
+                                        }
+                                    }
+                                    if (rowItems.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                    if (rowItems.size <= 2 && !compactLocationCards) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
                                 }
                             }
                         }
@@ -126,7 +158,6 @@ fun LocationGrid(
                 }
             }
         }
-
     }
 
     when (val state = locationDialogState) {

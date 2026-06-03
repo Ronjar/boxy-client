@@ -82,6 +82,7 @@ fun SearchModal(
                     }
                     items(it.assets, span = { GridItemSpan(3) }) { asset ->
                         SearchItem(
+                            modifier = Modifier.fillMaxWidth(),
                             text = asset.name,
                             icon = {
                                 Icon(

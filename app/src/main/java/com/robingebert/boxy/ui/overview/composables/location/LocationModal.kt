@@ -1,6 +1,8 @@
 package com.robingebert.boxy.ui.overview.composables.location
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import androidx.core.graphics.scale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -169,8 +172,21 @@ suspend fun saveImageToInternalStorage(context: Context, tempUri: Uri, fileName:
             val destinationFile = File(imagesFolder, fileName)
 
             context.contentResolver.openInputStream(tempUri)?.use { inputStream ->
-                FileOutputStream(destinationFile).use { outputStream ->
-                    inputStream.copyTo(outputStream)
+                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+                if (originalBitmap != null) {
+                    val targetWidth = 500
+                    val ratio = targetWidth.toFloat() / originalBitmap.width
+                    val targetHeight = (originalBitmap.height * ratio).toInt()
+
+                    val scaledBitmap = originalBitmap.scale(targetWidth, targetHeight)
+
+                    FileOutputStream(destinationFile).use { outputStream ->
+                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+                    }
+
+                    scaledBitmap.recycle()
+                    originalBitmap.recycle()
                 }
             }
 

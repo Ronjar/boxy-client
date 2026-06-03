@@ -6,12 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,20 +47,10 @@ fun OverviewScreen(
             .fillMaxSize(),
         contentAlignment = Alignment.BottomEnd
     ) {
-        FloatingActionButton(
-            modifier = Modifier.padding(16.dp),
-            onClick = {
-                showSearchDialog = true
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search"
-            )
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             LocationGrid(
                 modifier = Modifier
@@ -77,10 +68,23 @@ fun OverviewScreen(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
+                title = breadcrumbs.lastOrNull()?.name?: "Home",
                 assets = assets,
                 onNewAsset = { viewModel.newAsset() },
                 onSaveAsset = { viewModel.saveAsset(it) },
                 onDeleteAsset = { viewModel.removeAsset(it) }
+            )
+        }
+
+        FloatingActionButton(
+            modifier = Modifier.padding(24.dp),
+            onClick = {
+                showSearchDialog = true
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search"
             )
         }
     }
