@@ -102,7 +102,7 @@ fun LocationModal(
                 TextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("name") },
+                    label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -121,7 +121,7 @@ fun LocationModal(
                         }) {
                         Icon(Icons.Rounded.Save, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Take picture")
+                                Text("Foto aufnehmen")
                     }
 
                     val imageModel = capturedImageUri
@@ -131,7 +131,7 @@ fun LocationModal(
                     imageModel?.let {
                         AsyncImage(
                             model = it,
-                            contentDescription = "Picture of inventory",
+                            contentDescription = "Bild des Ortes",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(40.dp)
@@ -151,7 +151,7 @@ fun LocationModal(
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Save")
+                    Text("Speichern")
                 }
             }
         }

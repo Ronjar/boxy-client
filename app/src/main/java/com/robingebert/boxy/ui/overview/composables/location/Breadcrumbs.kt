@@ -79,7 +79,7 @@ fun Breadcrumbs(
 @Composable
 fun BreadcrumbsPreview() {
     Breadcrumbs(
-        breadcrumbs = listOf("Test", "Test2", "Test3")
+        breadcrumbs = listOf("Probe", "Probe 2", "Probe 3")
     ) {
 
     }

@@ -45,7 +45,7 @@ fun ServerConnectionDetailsDialog(
                 connection.readTimeout = 3000
 
                 connection.responseCode == 418
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
         }
@@ -54,7 +54,7 @@ fun ServerConnectionDetailsDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Connection to Service")
+            Text(text = "Verbindung zum Dienst")
         },
         text = {
             Column(
@@ -64,15 +64,15 @@ fun ServerConnectionDetailsDialog(
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Server URL") },
+                    label = { Text("Server-URL") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     isError = connectionPossible == false,
                     supportingText = {
                         if (connectionPossible == false) {
-                            Text("Unable to connect to the Server")
+                            Text("Verbindung zum Server nicht möglich")
                         } else if (connectionPossible == true) {
-                            Text("Connection successful")
+                            Text("Verbindung erfolgreich")
                         }
                     }
                 )
@@ -80,7 +80,7 @@ fun ServerConnectionDetailsDialog(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
+                    label = { Text("Benutzername") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -88,7 +88,7 @@ fun ServerConnectionDetailsDialog(
                 OutlinedTextField(
                     value = token,
                     onValueChange = { token = it },
-                    label = { Text("Password") },
+                    label = { Text("Passwort") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

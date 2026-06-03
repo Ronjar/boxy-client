@@ -83,7 +83,7 @@ fun LocationCardPreview() {
     Column {
         LocationCard(
             location = Location(
-                name = "Warehouse",
+                name = "Lagerhaus",
                 picture = null,
                 id = 1L,
                 updated = "",
@@ -95,7 +95,7 @@ fun LocationCardPreview() {
         )
         LocationCard(
             location = Location(
-                name = "Warehouse",
+                name = "Lagerhaus",
                 picture = null,
                 id = 1L,
                 updated = "",

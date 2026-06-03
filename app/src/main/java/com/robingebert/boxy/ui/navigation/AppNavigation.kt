@@ -27,7 +27,7 @@ fun AppNavigation(navController: NavHostController, onDestinationChanged: (Desti
         composable<Screen.Settings> {
             onDestinationChanged(
                 Destination(
-                    name = "Settings",
+                    name = "Einstellungen",
                     isMain = false
                 )
             )

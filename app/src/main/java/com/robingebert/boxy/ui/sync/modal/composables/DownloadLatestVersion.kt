@@ -23,7 +23,7 @@ fun DownloadLatestVersion(modifier: Modifier = Modifier, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(Icons.Default.CloudDownload, contentDescription = null)
-            Text(text = "Download")
+            Text(text = "Herunterladen")
         }
     }
 }

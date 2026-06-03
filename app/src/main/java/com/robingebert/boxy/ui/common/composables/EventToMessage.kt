@@ -23,28 +23,28 @@ fun rememberEventMessageResolver(): EventMessageResolver {
     return rememberUpdatedState< EventMessageResolver> { e ->
         if (e is SnackbarEvent.SnackbarException) {
             when (e.throwable) {
-                is NoBackupsYetException -> EventMessage("No backups yet", null)
-                is VersionNotFoundException -> EventMessage("Version not found", null)
-                is NetworkException -> EventMessage("Network error", null)
-                is BackupFailedException -> EventMessage("Backup failed", null)
-                is RestoreFailedException -> EventMessage("Restore failed", null)
-                else -> EventMessage("Unknown error", null)
+                is NoBackupsYetException -> EventMessage("Noch keine Backups vorhanden", null)
+                is VersionNotFoundException -> EventMessage("Version nicht gefunden", null)
+                is NetworkException -> EventMessage("Netzwerkfehler", null)
+                is BackupFailedException -> EventMessage("Backup fehlgeschlagen", null)
+                is RestoreFailedException -> EventMessage("Wiederherstellung fehlgeschlagen", null)
+                else -> EventMessage("Unbekannter Fehler", null)
             }
         }
         else if (e is SnackbarEvent.SnackbarMessage) {
             when(e.message) {
-                is Event.BackupSuccess -> EventMessage("Backup successful", null)
-                is Event.RestoreSuccess -> EventMessage("Restore successful", null)
-                is Event.DeleteSuccess -> EventMessage("Delete successful", null)
-                is Event.UpdateAvailable -> EventMessage("Update available", "Update") {
+                is Event.BackupSuccess -> EventMessage("Backup erfolgreich", null)
+                is Event.RestoreSuccess -> EventMessage("Wiederherstellung erfolgreich", null)
+                is Event.DeleteSuccess -> EventMessage("Löschen erfolgreich", null)
+                is Event.UpdateAvailable -> EventMessage("Update verfügbar", "Aktualisieren") {
                     e.message.onClick()
                 }
-                is Event.UpdateInstallable -> EventMessage("Update ready to install", "Install") {
+                is Event.UpdateInstallable -> EventMessage("Update kann installiert werden", "Installieren") {
                     e.message.onClick()
                 }
             }
         } else {
-            EventMessage("Unknown error", null)
+            EventMessage("Unbekannter Fehler", null)
         }
     }.value
 }

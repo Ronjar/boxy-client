@@ -38,7 +38,7 @@ fun VersionItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(text = dateText, style = MaterialTheme.typography.titleMedium)
-                Text(text = "by ${version.user}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "von ${version.user}", style = MaterialTheme.typography.bodyMedium)
             }
             IconButton(
                 onClick = onDownload

@@ -49,7 +49,7 @@ fun AssetModal(asset: Asset, onDismiss: () -> Unit, onSave: (Asset) -> Unit) {
                 TextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("name") },
+                    label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -61,7 +61,7 @@ fun AssetModal(asset: Asset, onDismiss: () -> Unit, onSave: (Asset) -> Unit) {
                 ) {
                     Icon(Icons.Rounded.Save, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Save")
+                    Text("Speichern")
                 }
             }
         }

@@ -45,8 +45,8 @@ fun DownloadedVersion(
             ) {
                 if (latestVersion is DataFetcher.Data) {
                     val text = when (latestVersion.data.id != localVersionString) {
-                        true -> "New update available"
-                        false -> "Newest version"
+                        true -> "Neues Update verfügbar"
+                        false -> "Neueste Version"
                     }
                     Text(
                         text = text
@@ -66,7 +66,7 @@ fun DownloadedVersion(
                     )
                     Text(
                         modifier = Modifier.alpha(0.8f),
-                        text = "by ${latestVersion.data.user}",
+                        text = "von ${latestVersion.data.user}",
                         style = MaterialTheme.typography.labelSmall
                     )
                 } else {
@@ -84,7 +84,7 @@ fun DownloadedVersion(
             ) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Show other versions"
+                    contentDescription = "Andere Versionen anzeigen"
                 )
             }
         }

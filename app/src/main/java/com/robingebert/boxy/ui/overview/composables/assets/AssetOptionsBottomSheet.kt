@@ -39,13 +39,13 @@ fun AssetOptionsBottomSheet(
         content = {
             ListItem(
                 icon = Icons.Default.Edit,
-                title = "Edit"
+                title = "Bearbeiten"
             ) {
                 onSelected(AssetOption.EDIT)
             }
             ListItem(
                 icon = Icons.Default.DeleteForever,
-                title = "Delete"
+                title = "Löschen"
             ) {
                 onSelected(AssetOption.DELETE)
             }

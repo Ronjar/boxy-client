@@ -64,11 +64,11 @@ fun SimpleCustomSearchBar(
                 }
             },
         shape = RoundedCornerShape(28.dp),
-        placeholder = { Text("Search") },
+        placeholder = { Text("Suchen") },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Search,
-                contentDescription = "Search Icon"
+                contentDescription = "Suchsymbol"
             )
         },
         trailingIcon = {
@@ -78,7 +78,7 @@ fun SimpleCustomSearchBar(
                 }) {
                     Icon(
                         imageVector = Icons.Rounded.Clear,
-                        contentDescription = "Clear Text"
+                        contentDescription = "Text löschen"
                     )
                 }
             }

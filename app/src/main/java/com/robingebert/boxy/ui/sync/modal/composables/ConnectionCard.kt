@@ -75,12 +75,12 @@ fun ConnectionCard(
                 modifier = Modifier.weight(1f)
             ) {
                 val text = when (connectionPossible) {
-                    true -> "Connected"
-                    false -> "Connection not possible"
-                    null -> "Checking connection..."
+                    true -> "Verbunden"
+                    false -> "Verbindung nicht möglich"
+                    null -> "Verbindung wird geprüft..."
                 }
                 if (url.isBlank()) {
-                    Text(text = "No server configured")
+                    Text(text = "Kein Server konfiguriert")
                 } else {
                     Text(text = text)
                     Text(text = url, style = MaterialTheme.typography.labelSmall)
@@ -94,7 +94,7 @@ fun ConnectionCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "Connection Settings"
+                    contentDescription = "Verbindungseinstellungen"
                 )
             }
         }

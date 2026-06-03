@@ -77,7 +77,7 @@ fun LocationGrid(
                 ) {
                     Breadcrumbs(
                         modifier = Modifier.weight(1f),
-                        breadcrumbs = listOf("Home") + breadcrumbs.map { it.name }
+                        breadcrumbs = listOf("Startseite") + breadcrumbs.map { it.name }
                     ) { index ->
                         for (i in breadcrumbs.size - index downTo 1) {
                             onNavigateUp()
@@ -93,10 +93,10 @@ fun LocationGrid(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add location",
+                            contentDescription = "Ort hinzufügen",
                             modifier = Modifier.size(ButtonDefaults.iconSizeFor(size)),
                         )
-                        Text("Add", style = ButtonDefaults.textStyleFor(size))
+                        Text("Hinzufügen", style = ButtonDefaults.textStyleFor(size))
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -106,8 +106,8 @@ fun LocationGrid(
                     columns = GridCells.Fixed(2)
                 ) {
                     when (locations) {
-                        is DataFetcher.Fetching -> item { Text("Loading...") }
-                        is DataFetcher.Error -> item { Text("Error") }
+                        is DataFetcher.Fetching -> item { Text("Lädt...") }
+                        is DataFetcher.Error -> item { Text("Fehler") }
                         is DataFetcher.Data -> {
                             items(locations.data) { location ->
                                 LocationCard(

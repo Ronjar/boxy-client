@@ -23,7 +23,7 @@ fun UploadLocalVersion(modifier: Modifier = Modifier, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(Icons.Default.CloudUpload, contentDescription = null)
-            Text(text = "Upload")
+            Text(text = "Hochladen")
         }
     }
 }

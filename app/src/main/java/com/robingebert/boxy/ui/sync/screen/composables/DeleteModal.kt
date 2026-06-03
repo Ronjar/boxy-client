@@ -26,7 +26,7 @@ fun DeleteModal(
             Column(
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
-                Text(text = "Are you sure you want to delete this version?")
+                Text(text = "Möchtest du diese Version wirklich löschen?")
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     modifier = Modifier.fillMaxWidth(),
@@ -38,7 +38,7 @@ fun DeleteModal(
                         onDelete()
                     }
                 ) {
-                    Text(text = "Delete")
+                    Text(text = "Löschen")
                 }
             }
 

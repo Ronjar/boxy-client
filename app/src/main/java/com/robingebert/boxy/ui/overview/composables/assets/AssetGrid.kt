@@ -45,7 +45,7 @@ fun AssetGrid(modifier: Modifier = Modifier, assets: DataFetcher<List<Asset>>, o
         ) {
             Text(
                 modifier = Modifier.weight(1f),
-                text = "Assets"
+                text = "Dinge"
             )
 
             val size = ButtonDefaults.ExtraSmallContainerHeight
@@ -58,10 +58,10 @@ fun AssetGrid(modifier: Modifier = Modifier, assets: DataFetcher<List<Asset>>, o
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add location",
+                    contentDescription = "Ding hinzufügen",
                     modifier = Modifier.size(ButtonDefaults.iconSizeFor(size)),
                 )
-                Text("Add", style = ButtonDefaults.textStyleFor(size))
+                Text("Hinzufügen", style = ButtonDefaults.textStyleFor(size))
             }
         }
 
@@ -71,8 +71,8 @@ fun AssetGrid(modifier: Modifier = Modifier, assets: DataFetcher<List<Asset>>, o
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             when (assets) {
-                is DataFetcher.Fetching -> item { Text("Loading...") }
-                is DataFetcher.Error -> item { Text("Error") }
+                is DataFetcher.Fetching -> item { Text("Lädt...") }
+                is DataFetcher.Error -> item { Text("Fehler") }
                 is DataFetcher.Data -> {
                     items(assets.data) { asset ->
                         AssetCard(
