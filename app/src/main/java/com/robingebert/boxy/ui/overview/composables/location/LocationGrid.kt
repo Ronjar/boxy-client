@@ -73,7 +73,8 @@ fun LocationGrid(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Breadcrumbs(
                         modifier = Modifier.weight(1f),
@@ -83,9 +84,9 @@ fun LocationGrid(
                             onNavigateUp()
                         }
                     }
-                    val size = ButtonDefaults.ExtraSmallContainerHeight
+                    val size = 36.dp
                     FilledIconButton(
-                        modifier = Modifier.heightIn(size),
+                        modifier = Modifier.size(size),
                         onClick = {
                             locationDialogState = EditOptionsDialogState.Edit(onAddLocation())
                         }
@@ -97,7 +98,7 @@ fun LocationGrid(
                         )
                     }
                     OutlinedIconButton(
-                        modifier = Modifier.heightIn(size),
+                        modifier = Modifier.size(size),
                         onClick = {
                             compactLocationCards = !compactLocationCards
                         }

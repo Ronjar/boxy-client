@@ -36,7 +36,7 @@ class SyncRepository(
     suspend fun getVersionsList(): Result<List<VersionInfo>> {
         return api.getVersionsList().fold(
             onSuccess = { versionStrings ->
-                Result.success(versionStrings.map { convertToVersionInfo(it) })
+                Result.success(versionStrings.map { convertToVersionInfo(it) }.sortedBy { it.date }.reversed())
             },
             onFailure = { e ->
                 return when (e) {

@@ -11,6 +11,9 @@ import com.robingebert.boxy.ui.common.SnackbarController
 import com.robingebert.boxy.ui.common.SnackbarEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
@@ -26,7 +29,9 @@ class MainViewModel(
     val localChanges = dataStoreManager.localChanges.flow
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
     val pulledVersion = dataStoreManager.pulledVersion.flow
-        .stateIn(viewModelScope, SharingStarted.Lazily, "")
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    val url = dataStoreManager.url.flow
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     private val _remoteChanges = MutableStateFlow<DataFetcher<Boolean>>(DataFetcher.Fetching)
     val remoteChanges = _remoteChanges
@@ -34,10 +39,15 @@ class MainViewModel(
 
     init {
         viewModelScope.launch {
-            pulledVersion.collect {
-                _remoteChanges.value = compareWithRemoteVersion(it)
+            val currentUrl = url.filterNotNull().first()
+            if (currentUrl.isNotBlank()) {
+                val localVersion = pulledVersion.filterNotNull().first()
+                _remoteChanges.value = compareWithRemoteVersion(localVersion)
+            } else {
+                _remoteChanges.value = DataFetcher.Data(false)
             }
         }
+
         checkForUpdates()
     }
 

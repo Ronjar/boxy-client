@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.robingebert.boxy.data.DataStoreManager
 import com.robingebert.boxy.ui.main.composables.MainLayout
 import com.robingebert.boxy.ui.main.composables.ServerConnectionDetailsDialog
 import com.robingebert.boxy.ui.navigation.AppNavigation
@@ -25,7 +26,7 @@ data class LoginData(val username: String, val token: String, val url: String?)
 class MainActivity : ComponentActivity() {
     private val deepLinkData = MutableStateFlow<LoginData?>(null)
 
-    private val viewModel by inject<MainViewModel>()
+    private val dataStoreManager by inject<DataStoreManager>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +46,9 @@ class MainActivity : ComponentActivity() {
                             deepLinkData.value = null
                         },
                         onConnect = { finalUrl, finalUsername, finalToken ->
-                            viewModel.setCredentials(finalUrl, finalUsername, finalToken)
+                            dataStoreManager.url.set(finalUrl)
+                            dataStoreManager.username.set(finalUsername)
+                            dataStoreManager.password.set(finalToken)
                             deepLinkData.value = null
                         }
                     )

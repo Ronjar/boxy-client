@@ -53,8 +53,9 @@ fun AssetGrid(
                 text = title
             )
 
-            val size = ButtonDefaults.ExtraSmallContainerHeight
+            val size = 36.dp
             FilledIconButton(
+                modifier = Modifier.size(size),
                 onClick = {
                     assetDialogState = EditOptionsDialogState.Edit(onNewAsset())
                 }

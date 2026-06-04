@@ -1,10 +1,12 @@
 package com.robingebert.boxy.data.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.InputProvider
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.utils.io.streams.asInput
 import java.io.File
 
 class NetworkException(cause: Throwable) : Exception(cause)
@@ -33,7 +35,9 @@ class SyncApi(private val client: HttpClient) {
             urlString = "",
             bodyData = MultiPartFormDataContent(
                 formData {
-                    append("file", zipFile.readBytes(), Headers.build {
+                    append("file", InputProvider(zipFile.length()) {
+                        zipFile.inputStream().asInput()
+                    }, Headers.build {
                         append(HttpHeaders.ContentType, "application/zip")
                         append(HttpHeaders.ContentDisposition, "filename=\"${zipFile.name}\"")
                     })
