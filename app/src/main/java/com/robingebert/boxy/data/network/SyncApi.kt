@@ -10,7 +10,7 @@ import io.ktor.utils.io.streams.asInput
 import java.io.File
 
 class NetworkException(cause: Throwable) : Exception(cause)
-class HttpException(statusCode: Int) : Exception(statusCode.toString())
+class HttpException(statusCode: Int, body: String) : Exception(statusCode.toString())
 
 class SyncApi(private val client: HttpClient) {
 

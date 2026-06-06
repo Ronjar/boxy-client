@@ -2,14 +2,54 @@ name: Build and Release Signed APK
 
 permissions:
   contents: write
+
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
   workflow_dispatch:
+
 jobs:
+  check-version:
+    name: Check Version Bump
+    runs-on: ubuntu-latest
+    outputs:
+      is_new_version: ${{ steps.version_check.outputs.is_new }}
+      new_version_tag: ${{ steps.version_check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version and compare
+        id: version_check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 1. Lokale Version aus build.gradle.kts auslesen
+          # Passe den Pfad an, falls deine Datei nicht in "app/" liegt
+          LOCAL_VERSION_RAW=$(grep -Po 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          LOCAL_VERSION="v$LOCAL_VERSION_RAW"
+          echo "Gefundene lokale Version: $LOCAL_VERSION"
+          
+          # 2. Letzte Release-Version von GitHub holen (ignoriert Fehler, falls noch kein Release existiert)
+          LATEST_RELEASE=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "none")
+          echo "Letzte Release-Version: $LATEST_RELEASE"
+          
+          # 3. Vergleichen
+          if [ "$LOCAL_VERSION" != "$LATEST_RELEASE" ] && [ -n "$LOCAL_VERSION_RAW" ]; then
+            echo "Neue Version erkannt!"
+            echo "is_new=true" >> $GITHUB_OUTPUT
+            echo "version=$LOCAL_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Keine neue Version. Abbruch."
+            echo "is_new=false" >> $GITHUB_OUTPUT
+          fi
+
   build:
     name: Build Signed APK
+    needs: check-version
+    if: needs.check-version.outputs.is_new_version == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,15 +66,21 @@ jobs:
         with:
           name: build-output
           path: app/build/outputs/apk/release/app-release.apk
+
   deploy:
     name: Deploy APK
-    needs: build
+    needs: [check-version, build]
+    if: needs.check-version.outputs.is_new_version == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: build-output
-      - uses: softprops/action-gh-release@v1
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ needs.check-version.outputs.new_version_tag }}
+          name: Release ${{ needs.check-version.outputs.new_version_tag }}
+          body: ${{ github.event.head_commit.message }}
           files: app-release.apk

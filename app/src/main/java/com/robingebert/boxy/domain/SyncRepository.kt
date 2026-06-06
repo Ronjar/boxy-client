@@ -3,6 +3,7 @@ package com.robingebert.boxy.domain
 import android.content.Context
 import com.robingebert.boxy.data.network.HttpException
 import com.robingebert.boxy.data.network.NetworkException
+import com.robingebert.boxy.domain.NetworkException as DomainNetworkException
 import com.robingebert.boxy.data.network.SyncApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,11 +46,11 @@ class SyncRepository(
                     }
 
                     is NetworkException -> {
-                        Result.failure(NetworkException())
+                        Result.failure(DomainNetworkException(e))
                     }
 
                     else -> {
-                        Result.failure(RestoreFailedException())
+                        Result.failure(RestoreFailedException(e))
                     }
                 }
             }
@@ -68,11 +69,11 @@ class SyncRepository(
                     }
 
                     is NetworkException -> {
-                        Result.failure(NetworkException())
+                        Result.failure(DomainNetworkException(e))
                     }
 
                     else -> {
-                        Result.failure(RestoreFailedException())
+                        Result.failure(RestoreFailedException(e))
                     }
                 }
             }
@@ -92,11 +93,11 @@ class SyncRepository(
                     }
 
                     is NetworkException -> {
-                        Result.failure(NetworkException())
+                        Result.failure(DomainNetworkException(e))
                     }
 
                     else -> {
-                        Result.failure(RestoreFailedException())
+                        Result.failure(RestoreFailedException(e))
                     }
                 }
             }
@@ -116,11 +117,11 @@ class SyncRepository(
                     }
 
                     is NetworkException -> {
-                        Result.failure(NetworkException())
+                        Result.failure(DomainNetworkException(e))
                     }
 
                     else -> {
-                        Result.failure(RestoreFailedException())
+                        Result.failure(RestoreFailedException(e))
                     }
                 }
             }
@@ -141,19 +142,19 @@ class SyncRepository(
                     when (e) {
                         is NetworkException -> {
                             tempZipFile.delete()
-                            Result.failure(NetworkException())
+                            Result.failure(DomainNetworkException(e))
                         }
 
                         else -> {
                             tempZipFile.delete()
-                            Result.failure(BackupFailedException())
+                            Result.failure(BackupFailedException(e))
                         }
                     }
                 }
             )
 
-        } catch (_: Exception) {
-            Result.failure(BackupFailedException())
+        } catch (e: Exception) {
+            Result.failure(BackupFailedException(e))
         }
     }
 
@@ -169,7 +170,7 @@ class SyncRepository(
                     }
 
                     is NetworkException -> {
-                        Result.failure(NetworkException())
+                        Result.failure(DomainNetworkException(e))
                     }
 
                     else -> {

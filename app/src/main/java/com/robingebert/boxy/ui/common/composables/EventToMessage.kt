@@ -22,14 +22,15 @@ typealias EventMessageResolver = (SnackbarEvent) -> EventMessage
 fun rememberEventMessageResolver(): EventMessageResolver {
     return rememberUpdatedState< EventMessageResolver> { e ->
         if (e is SnackbarEvent.SnackbarException) {
-            when (e.throwable) {
-                is NoBackupsYetException -> EventMessage("Noch keine Backups vorhanden", null)
-                is VersionNotFoundException -> EventMessage("Version nicht gefunden", null)
-                is NetworkException -> EventMessage("Netzwerkfehler", null)
-                is BackupFailedException -> EventMessage("Backup fehlgeschlagen", null)
-                is RestoreFailedException -> EventMessage("Wiederherstellung fehlgeschlagen", null)
-                else -> EventMessage("Unbekannter Fehler", null)
+            val text = when (e.throwable) {
+                is NoBackupsYetException -> "Noch keine Backups vorhanden"
+                is VersionNotFoundException -> "Version nicht gefunden"
+                is NetworkException ->"Netzwerkfehler"
+                is BackupFailedException -> "Backup fehlgeschlagen"
+                is RestoreFailedException -> "Wiederherstellung fehlgeschlagen"
+                else -> "Unbekannter Fehler"
             }
+            EventMessage(text, "Details")
         }
         else if (e is SnackbarEvent.SnackbarMessage) {
             when(e.message) {

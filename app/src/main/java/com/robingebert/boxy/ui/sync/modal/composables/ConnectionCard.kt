@@ -3,6 +3,7 @@ package com.robingebert.boxy.ui.sync.modal.composables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -38,6 +39,16 @@ fun ConnectionCard(
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
     var connectionPossible by remember { mutableStateOf<Boolean?>(false) }
+    val containerColor = when (connectionPossible) {
+        true -> MaterialTheme.colorScheme.primaryContainer
+        false -> MaterialTheme.colorScheme.errorContainer
+        null -> surfaceColor
+    }
+    val contentColor = when (connectionPossible) {
+        true -> MaterialTheme.colorScheme.onPrimaryContainer
+        false -> MaterialTheme.colorScheme.onErrorContainer
+        null -> MaterialTheme.colorScheme.onSurface
+    }
 
     LaunchedEffect(url) {
         connectionPossible = null
@@ -58,13 +69,8 @@ fun ConnectionCard(
     }
 
     Card(
-        modifier = modifier.shimmerLoading(isLoading = connectionPossible == null),
-        colors = CardDefaults.cardColors(
-            when (connectionPossible) {
-                true -> Color.Green
-                false -> Color.Red
-                null -> surfaceColor
-            }.copy(alpha = 0.5f)
+        modifier = modifier.shimmerLoading(isLoading = connectionPossible == null, shape = RoundedCornerShape(12.dp)),
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor
         )
     ) {
         Row(

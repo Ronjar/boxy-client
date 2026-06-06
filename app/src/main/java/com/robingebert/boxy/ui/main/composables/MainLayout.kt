@@ -40,12 +40,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.ui.common.SnackbarController
+import com.robingebert.boxy.ui.common.SnackbarEvent
+import com.robingebert.boxy.ui.common.composables.ExceptionModal
 import com.robingebert.boxy.ui.common.composables.rememberEventMessageResolver
 import com.robingebert.boxy.ui.main.MainViewModel
 import com.robingebert.boxy.ui.navigation.Destination
 import com.robingebert.boxy.ui.navigation.Screen
 import com.robingebert.boxy.ui.sync.modal.SyncBottomSheet
 import org.koin.compose.koinInject
+import kotlin.jvm.Throws
 
 @Composable
 fun MainLayout(
@@ -79,6 +82,7 @@ fun MainLayout(
     val eventToMessage = rememberEventMessageResolver()
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarController: SnackbarController = koinInject()
+    var exceptionStackTrace by remember { mutableStateOf<Throwable?>(null) }
 
     LaunchedEffect(snackbarController, snackbarHostState) {
         snackbarController.events.collect { event ->
@@ -89,7 +93,12 @@ fun MainLayout(
                 actionLabel = message.actionLabel
             )
             if (result == SnackbarResult.ActionPerformed) {
-                message.action?.invoke()
+                if (event is SnackbarEvent.SnackbarMessage) {
+                    message.action?.invoke()
+                } else {
+                    exceptionStackTrace =
+                        (event as? SnackbarEvent.SnackbarException)?.throwable
+                }
             }
         }
     }
@@ -106,8 +115,11 @@ fun MainLayout(
                 actions = {
                     if (destination.isMain) {
                         if (updateDownloadProgress in 0f..<1f) {
-                            Box(contentAlignment = Alignment.Center){
-                                CircularProgressIndicator(progress = {updateDownloadProgress}, strokeWidth = 3.dp)
+                            Box(contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(
+                                    progress = { updateDownloadProgress },
+                                    strokeWidth = 3.dp
+                                )
                                 IconButton(onClick = { viewModel.downloadButtonClicked() }) {
                                     Icon(
                                         imageVector = Icons.Rounded.Download,
@@ -168,5 +180,12 @@ fun MainLayout(
             showSyncBottomSheet = false
             navController.navigate(Screen.Sync)
         }
+    }
+
+    exceptionStackTrace?.let {
+        ExceptionModal(
+            exception = it,
+            onDismiss = { exceptionStackTrace = null }
+        )
     }
 }
