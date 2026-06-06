@@ -1,4 +1,4 @@
-package com.robingebert.boxy.ui.common.composables
+package com.robingebert.boxy.ui.main.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,12 +19,13 @@ fun ExceptionModal(exception: Throwable, onDismiss: () -> Unit) {
         onDismissRequest = { onDismiss() },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
     ) {
+        val title = exception.message?.let { ": $it" }
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Exception: ${exception.localizedMessage}",
+                text = "Exception$title",
                 style = MaterialTheme.typography.headlineSmall
             )
             Text(
