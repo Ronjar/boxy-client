@@ -6,6 +6,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlin.coroutines.cancellation.CancellationException
@@ -64,7 +65,7 @@ suspend inline fun <reified T> HttpClient.safeRequest(
         if (response.status.isSuccess()) {
             Result.success(response.body<T>())
         } else {
-            Result.failure(HttpException(response.status.value))
+            Result.failure(HttpException(response.status.value, response.bodyAsText()))
         }
     } catch (e: Exception) {
         if (e is CancellationException) throw e
