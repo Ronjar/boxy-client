@@ -7,17 +7,15 @@ plugins {
 android {
     namespace = "com.robingebert.boxy"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.robingebert.boxy"
         minSdk = 30
-        targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.2"
+        targetSdk = 37
+        versionCode = 3
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,6 +54,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.google.mediapipe.text)
+    implementation(libs.google.mlkit.translate)
 
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.icons.extended)
@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.composeSettings.ui)
     implementation(libs.composeSettings.ui.extended)
     implementation(libs.compose.shimmer.skeleton)
+    implementation(libs.terrakok.fuzzykot)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

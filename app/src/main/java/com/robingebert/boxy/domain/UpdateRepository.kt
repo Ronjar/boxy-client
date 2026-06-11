@@ -26,7 +26,7 @@ class UpdateRepository(
         val current = context.getAppVersionName()
         return updateApi.checkForVersion().fold(
             onSuccess = { latest ->
-                Result.success(if (latest.version != current) latest else null)
+                Result.success(if (!latest.version.contains(current)) latest else null)
             },
             onFailure = { e ->
                 Result.failure(e)

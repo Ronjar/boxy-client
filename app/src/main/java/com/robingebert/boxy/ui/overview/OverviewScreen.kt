@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robingebert.boxy.ui.overview.composables.assets.AssetGrid
 import com.robingebert.boxy.ui.overview.composables.location.LocationGrid
+import com.robingebert.boxy.ui.overview.composables.location.PathDialog
 import com.robingebert.boxy.ui.overview.composables.search.SearchModal
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -96,8 +97,7 @@ fun OverviewScreen(
                 viewModel.clearSearch()
             },
             searchResults = searchResults,
-            onSearch = { viewModel.search(it) },
-            onClearSearch = { viewModel.clearSearch() },
+            onSearch = { query, useAiSearch -> viewModel.search(query, useAiSearch) },
         ) {
             showSearchDialog = false
             viewModel.clearSearch()

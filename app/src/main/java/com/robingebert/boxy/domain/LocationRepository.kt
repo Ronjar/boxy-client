@@ -50,8 +50,8 @@ class LocationRepository(context: Context) {
         file.writeText(jsonString)
     }
 
-    suspend fun getAll(): List<Location> = mutex.withLock {
-        return _locations.value.toList()
+    suspend fun getById(id: Long): Location? = mutex.withLock {
+        return _locations.value.find { it.id == id }
     }
 
     suspend fun upsert(location: Location) = mutex.withLock {

@@ -7,6 +7,7 @@ import com.robingebert.boxy.data.network.SyncApi
 import com.robingebert.boxy.data.network.UpdateApi
 import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
+import com.robingebert.boxy.domain.SearchRepository
 import com.robingebert.boxy.ui.common.SnackbarController
 import com.robingebert.boxy.domain.SyncRepository
 import com.robingebert.boxy.domain.UpdateRepository
@@ -50,4 +51,5 @@ val commonModule = module {
     single { LocationRepository(get()) }
     single { SyncRepository(get(), get(), get(), get()) }
     single { UpdateRepository(get(), get()) }
+    single { SearchRepository(get(), get(), get()) }
 }

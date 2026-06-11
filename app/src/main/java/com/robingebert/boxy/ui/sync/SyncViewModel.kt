@@ -62,7 +62,7 @@ class SyncViewModel(
     fun getVersionsList() {
         viewModelScope.launch {
             syncRepository.getVersionsList().onSuccess {
-                _versions.value = DataFetcher.Data(it.reversed())
+                _versions.value = DataFetcher.Data(it)
             }
         }
     }
