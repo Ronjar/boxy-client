@@ -1,6 +1,3 @@
-import java.io.FileOutputStream
-import java.net.URI
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
