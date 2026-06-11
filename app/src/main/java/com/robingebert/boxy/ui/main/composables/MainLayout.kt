@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -47,6 +48,7 @@ import com.robingebert.boxy.ui.navigation.Screen
 import com.robingebert.boxy.ui.sync.modal.SyncBottomSheet
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainLayout(
     modifier: Modifier = Modifier,

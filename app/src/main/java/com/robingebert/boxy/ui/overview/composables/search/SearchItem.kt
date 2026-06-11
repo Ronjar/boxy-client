@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -23,9 +24,9 @@ fun SearchItem(modifier: Modifier = Modifier, text: String, icon: @Composable (M
             modifier = Modifier.padding(12.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            icon(Modifier.size(40.dp))
+            icon(Modifier.size(32.dp))
             Spacer(modifier = Modifier.width(12.dp))
-            Text(text = text)
+            Text(text = text, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }
 }

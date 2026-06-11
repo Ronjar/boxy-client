@@ -6,6 +6,7 @@ import com.robingebert.boxy.data.DataStoreManager
 import com.robingebert.boxy.data.network.DataFetcher
 import com.robingebert.boxy.domain.AssetRepository
 import com.robingebert.boxy.domain.LocationRepository
+import com.robingebert.boxy.domain.SearchRepository
 import com.robingebert.boxy.domain.models.Asset
 import com.robingebert.boxy.domain.models.Location
 import com.robingebert.boxy.domain.models.LocationNode
@@ -36,7 +37,8 @@ sealed interface UpNavigationTarget {
 class OverviewViewModel(
     private val dataStoreManager: DataStoreManager,
     private val locationRepository: LocationRepository,
-    private val assetRepository: AssetRepository
+    private val assetRepository: AssetRepository,
+    private val searchRepository: SearchRepository
 ) : ViewModel() {
 
     fun changed() {
@@ -197,19 +199,40 @@ class OverviewViewModel(
     //endregion
 
     //region Search
-    private val _searchResults = MutableStateFlow<SearchResult?>(null)
-    val searchResults: StateFlow<SearchResult?> = _searchResults.asStateFlow()
+    private val _searchResults = MutableStateFlow< DataFetcher<SearchResult>?>(null)
+    val searchResults: StateFlow<DataFetcher<SearchResult>?> = _searchResults.asStateFlow()
 
-    fun search(query: String) {
+    fun search(query: String, usesAiSearch: Boolean) {
         viewModelScope.launch {
-            val assets =
-                assetRepository.getAll().find { it.name.contains(query.trim(), ignoreCase = true) }
-                    ?.let { listOf(it) } ?: emptyList()
-            val locations =
-                locationRepository.getAll().find { it.name.contains(query.trim(), ignoreCase = true) }
-                    ?.let { listOf(it) } ?: emptyList()
+            _searchResults.value = DataFetcher.Fetching
 
-            _searchResults.value = SearchResult(assets, locations)
+            val searchResults =
+                if (usesAiSearch) searchRepository.searchWithAi(query) else searchRepository.searchFuzzy(
+                    query
+                )
+
+            val assets = mutableListOf<Asset>()
+            val locations = mutableListOf<Location>()
+
+            for (result in searchResults) {
+                when (result.first) {
+                    true -> {
+                        val location = locationRepository.getById(result.second)
+                        if (location != null) {
+                            locations += location
+                        }
+                    }
+
+                    false -> {
+                        val asset = assetRepository.getById(result.second)
+                        if (asset != null) {
+                            assets += asset
+                        }
+                    }
+                }
+            }
+
+            _searchResults.value = DataFetcher.Data(SearchResult(assets, locations))
         }
     }
 

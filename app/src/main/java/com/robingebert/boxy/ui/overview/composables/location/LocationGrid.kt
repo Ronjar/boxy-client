@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -51,6 +50,7 @@ fun LocationGrid(
 ) {
 
     var compactLocationCards by rememberSaveable { mutableStateOf(true) }
+    var showPathDialog by remember { mutableStateOf(false) }
 
     var locationDialogState by remember {
         mutableStateOf<EditOptionsDialogState<Location>>(
@@ -80,8 +80,15 @@ fun LocationGrid(
                         modifier = Modifier.weight(1f),
                         breadcrumbs = listOf("/") + breadcrumbs.map { it.name }
                     ) { index ->
-                        for (i in breadcrumbs.size - index downTo 1) {
-                            onNavigateUp()
+                        if (breadcrumbs.isNotEmpty()) {
+                            val count = breadcrumbs.size - index
+                            if (count > 0) {
+                                for (i in count downTo 1) {
+                                    onNavigateUp()
+                                }
+                            } else {
+                                showPathDialog = true
+                            }
                         }
                     }
                     val size = 36.dp
@@ -174,7 +181,8 @@ fun LocationGrid(
         }
 
         is EditOptionsDialogState.Options -> {
-            LocationOptionsBottomSheet(
+            LocationOptionsDialog(
+                location = state.data,
                 onDismiss = { locationDialogState = EditOptionsDialogState.None }
             ) {
                 when (it) {
@@ -191,5 +199,11 @@ fun LocationGrid(
         }
 
         else -> {}
+    }
+
+    if (showPathDialog) {
+        PathDialog(breadcrumbs) {
+            showPathDialog = false
+        }
     }
 }

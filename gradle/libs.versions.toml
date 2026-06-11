@@ -1,16 +1,19 @@
 [versions]
 agp = "9.2.1"
-coreKtx = "1.18.0"
+coreKtx = "1.19.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 kotlinxSerializationJson = "1.11.0"
-composeBom = "2026.04.01"
-material3 = "1.5.0-alpha18"
+composeBom = "2026.05.01"
+material3 = "1.5.0-alpha21"
 datetime = "0.8.0"
+#noinspection GradleDependency
+mediapipe-text = "0.10.35"
+mlkit-translate = "17.0.3"
 
 ktor = "3.5.0"
 koin = "4.2.1"
@@ -19,8 +22,9 @@ lifecycle = "2.10.0"
 navigationCompose = "2.9.8"
 datastore = "1.2.1"
 compose-settings = "3.1.0"
-coil = "3.4.0"
+coil = "3.5.0"
 composeShimmerSkeleton = "1.0.1"
+terrakok = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +47,9 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycle" }
 androidx-lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata", version.ref = "lifecycle" }
 
+google-mediapipe-text = { group = "com.google.mediapipe", name = "tasks-text", version.ref = "mediapipe-text" }
+google-mlkit-translate = { group = "com.google.mlkit", name = "translate", version.ref = "mlkit-translate" }
+
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "datetime"}
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
@@ -54,6 +61,7 @@ androidx-datastore-core-android = { group = "androidx.datastore", name = "datast
 composeSettings-ui = { group = "com.github.alorma.compose-settings", name = "ui-tiles", version.ref="compose-settings" }
 composeSettings-ui-extended = { group = "com.github.alorma.compose-settings", name = "ui-tiles-extended", version.ref = "compose-settings" }
 compose-shimmer-skeleton = { module = "dev.seyfarth:compose-shimmer-skeleton", version.ref = "composeShimmerSkeleton" }
+terrakok-fuzzykot = { group = "com.github.terrakok", name = "fuzzykot", version.ref = "terrakok" }
 
 
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }

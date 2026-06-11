@@ -1,3 +1,6 @@
+import java.io.FileOutputStream
+import java.net.URI
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -7,17 +10,15 @@ plugins {
 android {
     namespace = "com.robingebert.boxy"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.robingebert.boxy"
         minSdk = 30
-        targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.2"
+        targetSdk = 37
+        versionCode = 4
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,6 +41,32 @@ android {
     }
 }
 
+tasks.register("downloadTextClassificationModel") {
+    description = "Downloads the model for text classification if it doesn't already exist."
+    val modelUrl = "https://storage.googleapis.com/mediapipe-tasks/text_embedder/universal_sentence_encoder.tflite"
+    val targetFile = file("src/main/assets/universal_sentence_encoder.tflite")
+
+    doLast {
+        if (!targetFile.exists()) {
+            println("Downloading model...")
+            targetFile.parentFile.mkdirs()
+
+            URI.create(modelUrl).toURL().openStream().use { input ->
+                FileOutputStream(targetFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            println("Download finished!")
+        } else {
+            println("Model already existing, skipping.")
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn("downloadTextClassificationModel")
+}
+
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -56,6 +83,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.google.mediapipe.text)
+    implementation(libs.google.mlkit.translate)
 
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.icons.extended)
@@ -66,6 +95,7 @@ dependencies {
     implementation(libs.composeSettings.ui)
     implementation(libs.composeSettings.ui.extended)
     implementation(libs.compose.shimmer.skeleton)
+    implementation(libs.terrakok.fuzzykot)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
